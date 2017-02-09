@@ -1,5 +1,4 @@
 #include "EventInterpretation.h"
-#include <boost/algorithm/string.hpp>
 #include <iostream>
 using namespace std;
 bool operator==(const std::string log_pattern_, const EventInterpretation & event_interpretation_)

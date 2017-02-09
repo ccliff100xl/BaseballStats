@@ -7,7 +7,7 @@
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
 
-#define GAME_LOG_FILE "C:\\Users\\ccliffor\\Google Drive\\SportsStatsOld\\GameLogs\\2014WS.EVE"
+#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
 #define TEAM_LIST_FILE  "TeamList.txt"
 
 using namespace std;
@@ -24,13 +24,17 @@ int main()
 		//Create a game set object
 		GameSet gs(GAME_LOG_FILE, &ts);
 
-		//Print the games played
-		gs.printGameResults();
-
 		//Create database
 		BaseballDatabase db(&ts, &gs);
-		//db.printPlayerList();
+
+		//Print Players
+		db.printPlayerList();
+
+		//Print Plays
 		db.printPlayList();
+
+		//Print the results of the games played
+		gs.printGameResults();
 	}
 	catch (std::exception& e) {
 		//Print exception information

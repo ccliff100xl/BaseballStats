@@ -1,6 +1,6 @@
 #include "TeamSet.h"
 #include <iostream>
-#include <boost/algorithm/string.hpp>
+#include <string>
 
 using namespace std;
 
@@ -16,7 +16,7 @@ TeamSet::TeamSet(std::string team_list_file_) : CsvBasedObject(team_list_file_)
 		Team* team_to_update = NULL;
 		//&& means loop through references so vector can be changed
 		for (auto&& team : _teams) {
-			if (boost::equal(id_team, team.getId())) {
+			if (id_team == team.getId()) {
 				//This team has been seen before, replace it
 				team_to_update = &team;
 				break;
@@ -49,7 +49,7 @@ const Team* TeamSet::getTeam(std::string team_id_) const
 {
 	//Search for ID
 	for (auto&& team : _teams) {
-		if (boost::equal(team_id_, team.getId())) {
+		if (team_id_ == team.getId()) {
 			//Found match, return
 			return &team;
 		}
