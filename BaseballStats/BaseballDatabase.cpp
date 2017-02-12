@@ -46,17 +46,10 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_) : _te
 		}
 
 		// Loop over all plays and copy
-	    for (auto&& play : game.getPlays()) {
+		for (auto&& play : game.getPlays()) {
 			_plays.push_back(PlayRecord(&play, this));
 		}
 	}
-
-	//////////////////
-	/// Calculate Statistics
-	//////////////////
-	
-	//Calculate batting average of every player
-
 }
 
 //Return true if player was added to database, false if it alread existed
@@ -86,7 +79,7 @@ bool BaseballDatabase::addPlayer(const Player* player_)
 void BaseballDatabase::printPlayerList() const
 {
 	for (auto&& p : _players) {
-		cout << p << endl;
+		cout << p << " " << p.getID() << endl;
 	}
 }
 
@@ -95,4 +88,41 @@ void BaseballDatabase::printPlayList() const
 	for (auto&& p : _plays) {
 		cout << p << endl;
 	}
+}
+
+//TODO: This is not matching the web, probably need to print each at bat and compare
+double BaseballDatabase::getPlayerBattingAverage(const std::string player_id_, int& n_atbats_, int& n_hits_) const
+{
+	//Reset counts
+	n_atbats_ = 0;
+	n_hits_ = 0;
+
+	//Loop over plays
+	for (auto&& p : _plays) {
+		//Check hitter
+		if (p.getBatterID() == player_id_) {
+			//Print play for debug
+			//std::cout << p << std::endl;
+
+			//Add this play
+			n_atbats_ += p.getNumberAtBats();
+			n_hits_ += p.getNumberHits();
+		}
+	}
+
+	//Calculate average
+	return static_cast<double>( n_hits_ ) / n_atbats_;
+}
+
+const Player BaseballDatabase::getPlayer(const std::string player_id_) const
+{
+	//Find matching player
+	for (auto&& p : _players) {
+		if (p.getID() == player_id_) {
+			return p;
+		}
+	}
+
+	//If it makes it here, its an error
+	throw exception("BaseballDatabase::getPlayer Error: Could not final player_id_");
 }

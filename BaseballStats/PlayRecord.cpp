@@ -23,6 +23,7 @@ void PlayRecord::addBatter(const vector<Player>& players_)
 		if (boost::equal(getBatterID(), player.getID())) {
 			//These are equal, add the pointer
 			_batter = &player;
+			break;
 		}
 	}
 }
@@ -39,7 +40,7 @@ BattingResult PlayRecord::parseBattingResult(string play_string_)
 
 ostream & operator<<(ostream & os, const PlayRecord & p)
 {
-	os << *(p._batter) << " " << BattingResultString[p._batting_result];
+	os << " " << *(p._batter) << " " << BattingResultString[p._batting_result] << " " << p.getLineRaw();
 	return os;
 }
 
@@ -48,6 +49,7 @@ int PlayRecord::getNumberAtBats() const
 {
 	//Check if this was a valid at bat
 	switch (_batting_result) {
+	case ERROR:
 	case GROUND_OUT: 
 	case FLY_OUT:
 	case STRIKE_OUT: 
@@ -58,7 +60,6 @@ int PlayRecord::getNumberAtBats() const
 		//These are all valid at bats, return 1
 		return 1;
 	case WALK:
-	case ERROR:
 	case NO_PLAY:
 		//These are not at bats
 		return 0;

@@ -44,6 +44,7 @@ public:
 	TeamType getTeam() const { return _team; }
 	std::string getBatterID() const { return _player_id; }
 	std::string getEventRaw() const { return _event_raw; }
+	std::string getLineRaw() const { return _line_raw; }
 
 	//This is a test method, this sort of calculation should only be done in PlayRecord
 	int getRunsScored() const;

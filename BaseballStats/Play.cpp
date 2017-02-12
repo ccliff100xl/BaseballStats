@@ -10,7 +10,6 @@ Play::Play(string line_raw_) : _line_raw(line_raw_)
 	//Parse line and add to members (need to delete defaults in header)
 	vector<string> line_parsed;
 	boost::split(line_parsed, line_raw_, boost::is_any_of(","));
-	//boost::split(line_parsed, line_raw_, ",");
 	_inning = stoi(line_parsed[1]);
 	_team = (TeamType) stoi(line_parsed[2]);
 	_player_id = line_parsed[3];
