@@ -47,7 +47,7 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_) : _te
 
 		// Loop over all plays and copy
 		for (auto&& play : game.getPlays()) {
-			_plays.push_back(PlayRecord(&play, this));
+			_plays.push_back(PlayRecord(&play, &game, this));
 		}
 	}
 }

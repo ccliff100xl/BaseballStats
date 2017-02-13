@@ -7,7 +7,7 @@
 using namespace std;
 
 //Create from a pointer to a play object
-PlayRecord::PlayRecord(const Play* play_, const BaseballDatabase* const db_) : Play(*play_) , _db(db_)
+PlayRecord::PlayRecord(const Play* play_, const GameLog * const game_, const BaseballDatabase* const db_) : Play(*play_) , _game(game_), _db(db_)
 {
 	//Add batter
 	addBatter(_db->getPlayers());

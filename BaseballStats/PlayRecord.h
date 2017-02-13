@@ -1,5 +1,6 @@
 #pragma once
 #include "Play.h"
+#include "GameLog.h"
 #include "SportsStatsConstants.h"
 
 //Forward declaration
@@ -9,12 +10,13 @@ class PlayRecord : public Play
 {
 	//Reminder: that const* means that the object pointed to cannot be modified.  The pointer can be
 	const Player* _batter = NULL;
-    const BaseballDatabase * const _db;
+	const GameLog* const _game;
+    const BaseballDatabase* const _db;
 
 	BattingResult _batting_result = NOT_PARSED;
 public:
 	//Only constructor is from Play* pointer
-	PlayRecord(const Play* play_, const BaseballDatabase* const db_);
+	PlayRecord(const Play* play_, const GameLog * const game_, const BaseballDatabase* const db_);
 
 	//Accessors
 

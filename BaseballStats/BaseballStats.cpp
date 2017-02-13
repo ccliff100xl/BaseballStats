@@ -32,10 +32,10 @@ int main()
 		db.printPlayerList();
 
 		//Print Plays
-		//db.printPlayList();
+		db.printPlayList();
 
 		//Print the results of the games played
-		//gs.printGameResults();
+		gs.printGameResults();
 
 		//Print averages
 		int n_atbats = -1;
