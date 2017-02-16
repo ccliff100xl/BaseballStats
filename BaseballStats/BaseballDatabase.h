@@ -18,8 +18,10 @@ public:
 
 	void printPlayerList() const;
 	void printPlayList() const;
+	void printAllBattingAverages() const;
 
 	double getPlayerBattingAverage(const std::string player_id_, int& n_atbats_, int& n_hits_) const;
+	double getPlayerBattingAverage(const std::string player_id_) const;
 
 private:
 	bool addPlayer(const Player* player_);

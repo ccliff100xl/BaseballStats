@@ -8,12 +8,14 @@ class BaseballDatabase;
 
 class PlayRecord : public Play
 {
-	//Reminder: that const* means that the object pointed to cannot be modified.  The pointer can be
+	//Pointers to objects related to this play
 	const Player* _batter = NULL;
 	const GameLog* const _game;
     const BaseballDatabase* const _db;
 
+	//Results of this play
 	BattingResult _batting_result = NOT_PARSED;
+	bool _sacrifice = false;
 public:
 	//Only constructor is from Play* pointer
 	PlayRecord(const Play* play_, const GameLog * const game_, const BaseballDatabase* const db_);
@@ -32,6 +34,7 @@ private:
 	void addBatter(const std::vector<Player>& players_);
 
 	//Function to parse what the result was for the batter
-	BattingResult parseBattingResult(std::string play_string_);
+	static BattingResult parseBattingResult(std::string play_string_);
+	static bool parseSacrifice(std::string play_string_);
 };
 

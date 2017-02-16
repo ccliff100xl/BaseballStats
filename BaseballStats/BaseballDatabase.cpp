@@ -1,5 +1,6 @@
 #include "BaseballDatabase.h"
 #include <algorithm>
+#include <iomanip>
 
 using namespace std;
 
@@ -90,7 +91,18 @@ void BaseballDatabase::printPlayList() const
 	}
 }
 
-//TODO: This is not matching the web, probably need to print each at bat and compare
+void BaseballDatabase::printAllBattingAverages() const
+{
+	for (auto&& p : _players) {
+		int n_atbats = -1;
+		int n_hits = -1;
+		const std::string playerid = p.getID();
+		double average = getPlayerBattingAverage(playerid, n_atbats, n_hits);
+		const Player player = getPlayer(playerid);
+		cout << player << " " << n_hits << "/" << n_atbats << " " << std::setprecision(3) << std::fixed << average << endl;
+	}
+}
+
 double BaseballDatabase::getPlayerBattingAverage(const std::string player_id_, int& n_atbats_, int& n_hits_) const
 {
 	//Reset counts
@@ -110,8 +122,21 @@ double BaseballDatabase::getPlayerBattingAverage(const std::string player_id_, i
 		}
 	}
 
+	//If there are no at bats, just return 0
+	if (n_hits_ == 0) return 0.0;
+
 	//Calculate average
 	return static_cast<double>( n_hits_ ) / n_atbats_;
+}
+
+double BaseballDatabase::getPlayerBattingAverage(const std::string player_id_) const
+{
+	//Make counts
+	int n_atbats_ = 0;
+	int n_hits_ = 0;
+
+	//Call function
+	return getPlayerBattingAverage(player_id_, n_atbats_, n_hits_);
 }
 
 const Player BaseballDatabase::getPlayer(const std::string player_id_) const

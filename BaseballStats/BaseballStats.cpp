@@ -2,7 +2,6 @@
 //
 
 #include <iostream>
-#include <iomanip>
 #include "stdafx.h"
 #include "GameSet.h"
 #include "TeamSet.h"
@@ -38,14 +37,9 @@ int main()
 		gs.printGameResults();
 
 		//Print averages
-		int n_atbats = -1;
-		int n_hits   = -1 ;
-		std::string playerid("poseb001");
-		double average = db.getPlayerBattingAverage(playerid, n_atbats, n_hits);
-		const Player player = db.getPlayer(playerid);
-		cout << player << " " << n_hits << "/" << n_atbats << " " << std::setprecision(3) <<average << endl;
-	}
-	catch (std::exception& e) {
+		db.printAllBattingAverages();
+
+	} catch (std::exception& e) {
 		//Print exception information
 		cout << "ERROR: " << endl << e.what() << endl;
 		//Return 1 for error

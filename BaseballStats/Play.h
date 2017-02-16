@@ -31,10 +31,12 @@ public:
 	// Methods to create object
 
 	Play(std::string line_raw_);
+
 	void addComment(std::string comment_line)
 	{
 		_comments.push_back(comment_line);
 	}
+
 	void addSub(ActivePlayer& sub_line)
 	{
 		_subs.push_back(sub_line);

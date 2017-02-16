@@ -26,18 +26,15 @@ bool operator==(const std::string log_pattern_, const EventInterpretation & even
 		}
 	}
 
-	//Return if this matches, only search length of event_string
-	const int match_result = event_string.compare(0, event_string.length(), log_pattern, 0, event_string.length());
-	if (match_result == 0) {
-		//This is a specific hack to avoid SB being interpreted as S
-		if (event_string == "S") {
-			//Make sure this is not actually SB
-			const int sb_result = log_pattern.compare(0, 2, "SB", 0, 2);
-			if (sb_result == 0) {
-				//This is SB, NOT S< return false
-				return false;
-			}
-		}
+	//If it makes it here, the event_string is char(s), get leading string from log_pattern
+	const size_t i_digit = log_pattern.find_first_of("0123456789/.");
+	//Make sure i_digit is > 0, or it's definitely not a match
+	if (i_digit < 1) return false;
+	//Get substring from log
+	const std::string play_str = log_pattern.substr(0, i_digit);
+
+	//Return if this matches
+	if (play_str == event_string) {
 		return true;
 	} else {
 		return false;
@@ -50,19 +47,32 @@ bool operator==(const EventInterpretation& event_interpretation_, const std::str
 }
 
 //$ means one number, $$ means two numbers
+//source: http://www.retrosheet.org/eventfile.htm
+//TODO: Need to add modifier for sacrifice to the play
 const std::vector<EventInterpretation> EventInterpretation::InterpretationArray = {
 	EventInterpretation("S", BattingResult::SINGLE),
 	EventInterpretation("D", BattingResult::DOUBLE),
+	EventInterpretation("DGR", BattingResult::DOUBLE), //Ground rule double
 	EventInterpretation("T", BattingResult::TRIPLE),
 	EventInterpretation("HR", BattingResult::HR),
 	EventInterpretation("K", BattingResult::STRIKE_OUT),
 	EventInterpretation("E", BattingResult::ERROR),
+	EventInterpretation("FC", BattingResult::FIELDERS_CHOICE),
 	EventInterpretation("W", BattingResult::WALK),
 	EventInterpretation("I", BattingResult::WALK),
+	EventInterpretation("IW", BattingResult::WALK),
 	EventInterpretation("HP", BattingResult::WALK),
 	EventInterpretation("NP", BattingResult::NO_PLAY),
-	EventInterpretation("SB", BattingResult::NO_PLAY),
-	EventInterpretation("C", BattingResult::NO_PLAY), //Overly simplistic
+	EventInterpretation("C", BattingResult::CATCHER_INTERFERENCE), //Catcher interference
+	EventInterpretation("BK", BattingResult::NO_PLAY), //Balk
+	EventInterpretation("CS", BattingResult::NO_PLAY), //Caught Stealing
+	EventInterpretation("DI", BattingResult::NO_PLAY), //Defensive indiference
+	EventInterpretation("OA", BattingResult::NO_PLAY), //Unknown baserunner advance
+	EventInterpretation("PB", BattingResult::NO_PLAY), //Passed ball
+	EventInterpretation("WP", BattingResult::NO_PLAY), //Wild pitch
+	EventInterpretation("PO", BattingResult::NO_PLAY), //Picked off
+	EventInterpretation("POCS", BattingResult::NO_PLAY), //Picked off (caught stealing)
+	EventInterpretation("SB", BattingResult::NO_PLAY), //Stolen Base
 	EventInterpretation("$", BattingResult::FLY_OUT),
 	EventInterpretation("$$", BattingResult::GROUND_OUT),
 };
