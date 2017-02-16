@@ -39,6 +39,9 @@ int main()
 		//Print averages
 		db.printAllBattingAverages();
 
+		//Print slugging
+		db.printAllSluggingPercentages();
+
 	} catch (std::exception& e) {
 		//Print exception information
 		cout << "ERROR: " << endl << e.what() << endl;

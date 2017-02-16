@@ -103,6 +103,20 @@ void BaseballDatabase::printAllBattingAverages() const
 	}
 }
 
+void BaseballDatabase::printAllSluggingPercentages() const
+{
+	for (auto&& p : _players) {
+		const std::string playerid = p.getID();
+		double slugging = getPlayerSluggingPercentage(playerid);
+
+		//Don't print if it's 0
+		if (slugging < FLT_EPSILON) continue;
+
+		const Player player = getPlayer(playerid);
+		cout << player << " " << std::setprecision(3) << std::fixed << slugging << endl;
+	}
+}
+
 double BaseballDatabase::getPlayerBattingAverage(const std::string player_id_, int& n_atbats_, int& n_hits_) const
 {
 	//Reset counts
@@ -137,6 +151,32 @@ double BaseballDatabase::getPlayerBattingAverage(const std::string player_id_) c
 
 	//Call function
 	return getPlayerBattingAverage(player_id_, n_atbats_, n_hits_);
+}
+
+double BaseballDatabase::getPlayerSluggingPercentage(const std::string player_id_) const
+{
+	//Setup counts
+	int  n_atbats = 0;
+    int  n_bases = 0;
+
+	//Loop over plays
+	for (auto&& p : _plays) {
+		//Check hitter
+		if (p.getBatterID() == player_id_) {
+			//Print play for debug
+			//std::cout << p << std::endl;
+
+			//Add this play
+			n_atbats += p.getNumberAtBats();
+			n_bases += p.getNumberBases();
+		}
+	}
+
+	//If there are no bases, just return 0
+	if (n_bases == 0) return 0.0;
+
+	//Calculate average
+	return static_cast<double>(n_bases) / n_atbats;
 }
 
 const Player BaseballDatabase::getPlayer(const std::string player_id_) const

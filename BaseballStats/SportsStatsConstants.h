@@ -42,4 +42,3 @@ static std::map< BattingResult, const char * > BattingResultString = {
 	{ NOT_PARSED, "NOT_PARSED" }
 };
 
-

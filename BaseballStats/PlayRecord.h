@@ -26,6 +26,9 @@ public:
 	int getNumberAtBats() const;
 	int getNumberHits() const;
 
+	//For slugging
+	int getNumberBases() const;
+
 	//Make operator definition a friend
 	friend std::ostream& operator<<(std::ostream & os, const PlayRecord & t);
 

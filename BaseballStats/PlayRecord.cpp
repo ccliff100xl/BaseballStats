@@ -122,11 +122,37 @@ int PlayRecord::getNumberHits() const
 	case NO_PLAY:
 	case FIELDERS_CHOICE:
 	case CATCHER_INTERFERENCE:
-		//These are nothits
+		//These are no thits
 		return 0;
 	default:
 		cout << "Play " << BattingResultString[_batting_result] << " not recognized by getNumberAtBats" << endl;
 		throw exception("Error in getNumberHits");
+	}
+	//Should never be here
+	return -1;
+}
+
+int PlayRecord::getNumberBases() const
+{
+	//Base this on num hits, to avoid code duplication
+	if (getNumberHits() == 0) {
+		//No hits means no bases
+		return 0;
+	}
+	
+	//If it makes it here it was a hit, check which one
+	switch (_batting_result) {
+	case SINGLE:
+		return 1;
+	case DOUBLE:
+		return 2;
+	case TRIPLE:
+		return 3;
+	case HR:
+		return 4;
+	default:
+		cout << "Play " << BattingResultString[_batting_result] << " not recognized by getNumberBases" << endl;
+		throw exception("Error in getNumberBases");
 	}
 	//Should never be here
 	return -1;
