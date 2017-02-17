@@ -155,10 +155,10 @@
     <ClInclude Include="FileBasedObject.h" />
     <ClInclude Include="GameLog.h" />
     <ClInclude Include="GameSet.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="InfoItem.h" />
     <ClInclude Include="Play.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="PlayerRecord.h" />
     <ClInclude Include="PlayRecord.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="SetFromFile.h" />
@@ -176,9 +176,9 @@
     <ClCompile Include="FileBasedObject.cpp" />
     <ClCompile Include="GameLog.cpp" />
     <ClCompile Include="GameSet.cpp" />
+    <ClCompile Include="GameState.cpp" />
     <ClCompile Include="Play.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="PlayerRecord.cpp" />
     <ClCompile Include="PlayRecord.cpp" />
     <ClCompile Include="SetFromFile.cpp" />
     <ClCompile Include="stdafx.cpp" />

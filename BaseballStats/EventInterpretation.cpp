@@ -62,7 +62,7 @@ const std::vector<EventInterpretation> EventInterpretation::InterpretationArray 
 	EventInterpretation("I", BattingResult::WALK),
 	EventInterpretation("IW", BattingResult::WALK),
 	EventInterpretation("HP", BattingResult::WALK),
-	EventInterpretation("NP", BattingResult::NO_PLAY),
+	EventInterpretation("NP", BattingResult::NO_PLAY), //NP is used for substitutions
 	EventInterpretation("C", BattingResult::CATCHER_INTERFERENCE), //Catcher interference
 	EventInterpretation("BK", BattingResult::NO_PLAY), //Balk
 	EventInterpretation("CS", BattingResult::NO_PLAY), //Caught Stealing

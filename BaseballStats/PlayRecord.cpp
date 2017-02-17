@@ -7,7 +7,8 @@
 using namespace std;
 
 //Create from a pointer to a play object
-PlayRecord::PlayRecord(const Play* play_, const GameLog * const game_, const BaseballDatabase* const db_) : Play(*play_) , _game(game_), _db(db_)
+//baserunners_ holds runner on first, second, and third at start of play
+PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * const game_, const BaseballDatabase* const db_) : Play(*play_) , _state(*state_), _game(game_), _db(db_)
 {
 	//Add batter
 	addBatter(_db->getPlayers());
@@ -17,6 +18,10 @@ PlayRecord::PlayRecord(const Play* play_, const GameLog * const game_, const Bas
 
 	//Determine if it was a sacrifce
 	_sacrifice = parseSacrifice(getEventRaw());
+
+	//Update input state
+	state_->setBatter(getBatter());
+	state_->updateStateFromPlay(this);
 }
 
 void PlayRecord::addBatter(const vector<Player>& players_)
@@ -25,7 +30,7 @@ void PlayRecord::addBatter(const vector<Player>& players_)
 	for (auto&& player : players_) {
 		if (boost::equal(getBatterID(), player.getID())) {
 			//These are equal, add the pointer
-			_batter = &player;
+			_state.setBatter(&player);
 			break;
 		}
 	}
@@ -65,7 +70,7 @@ bool PlayRecord::parseSacrifice(std::string play_string_)
 
 ostream & operator<<(ostream & os, const PlayRecord & p)
 {
-	os << " " << *(p._batter) << " " << BattingResultString[p._batting_result] << " " << p.getLineRaw();
+	os << " " << *(p.getBatter()) << " " << BattingResultString[p._batting_result] << " " << p.getLineRaw();
 	return os;
 }
 
