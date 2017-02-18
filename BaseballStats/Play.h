@@ -48,9 +48,6 @@ public:
 	std::string getEventRaw() const { return _event_raw; }
 	std::string getLineRaw() const { return _line_raw; }
 
-	//This is a test method, this sort of calculation should only be done in PlayRecord
-	int getRunsScored() const;
-
 	const std::vector<ActivePlayer>& getSubs() const { return _subs; }
 };
 

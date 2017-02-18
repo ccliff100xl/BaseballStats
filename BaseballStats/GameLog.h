@@ -41,9 +41,6 @@ public:
 	/////////////
 	// Methods to get information from object
 
-	//Return score of game
-	std::vector<int> getScore() const ;
-
 	//Get game ID
 	const std::string getID() const;
 

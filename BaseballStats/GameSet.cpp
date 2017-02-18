@@ -65,18 +65,3 @@ GameSet::GameSet(string logs_file_path_, TeamSet* team_set_) : _team_set(team_se
 
 }
 
-//This will print the results of each game
-//to cout
-void GameSet::printGameResults()
-{
-	//Loop over logs
-	for (auto&& log : _logs) {
-		//Get score of this game
-		const vector<int> score = log.getScore();
-		const Team* home = _team_set->getTeam(log.getHomeTeamID());
-		const Team* visitor = _team_set->getTeam(log.getVisitorTeamID());
-		cout << *visitor << " " << score[0] 
-			<< " " << *home << " " << score[1] << " " << endl;
-	}
-}
-

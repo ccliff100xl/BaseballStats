@@ -33,9 +33,6 @@ int main()
 		//Print Plays
 		db.printPlayList();
 
-		//Print the results of the games played
-		gs.printGameResults();
-
 		//Print averages
 		db.printAllBattingAverages();
 

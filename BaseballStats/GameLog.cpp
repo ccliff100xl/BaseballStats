@@ -73,22 +73,6 @@ bool GameLog::parseLogLine(const string line_)
 	return true;
 }
 
-//This function will return a vector<int> of length
-//two.  The first entry will be the visitors score,
-//the second will be the home teams score
-std::vector<int> GameLog::getScore() const
-{
-	//Create vector to hold score
-	vector<int> score = { 0, 0 };
-
-	//Loop over plays and add runs
-	for (auto&& play : _plays) {
-		score[play.getTeam()] += play.getRunsScored();
-	}
-
-	return score;
-}
-
 const std::string GameLog::getID() const
 {
 	return getInfoItemInformation("id");

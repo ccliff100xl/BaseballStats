@@ -9,6 +9,5 @@ class GameSet
 public:
 	GameSet(std::string logs_file_path_, TeamSet* team_set_);
 	const std::vector<GameLog>& getGamesLogs() const { return _logs; }
-	void printGameResults();
 };
 

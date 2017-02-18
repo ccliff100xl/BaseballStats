@@ -25,39 +25,6 @@ Play::Play(string line_raw_) : _line_raw(line_raw_)
 	_event_raw = line_parsed[6];
 }
 
-//This will return the number of runs scored on this play
-int Play::getRunsScored() const
-{
-	//Ther are two things that represent a scored run
-	//  1.) -H in event (runner advance to home)
-	//      could be more than one
-	//  2.) HR in beginning of even for homerun
-
-	//Make sure the event actually has enough length
-	if (_event_raw.size() < 2) return 0;
-
-	//Create variable to hold runs scored
-	int runs = 0;
-
-	//Was it a homerun?
-	if (_event_raw.compare(0, 2, "HR") == 0) {
-		//This is a homerun
-		//cout << "HOMERUN!" << endl;
-		runs++;
-	}
-
-	//Did any runners score?, loop over string to find "-H"
-	for (unsigned int i = 0; i < _event_raw.length() - 1; i++) {
-		//Is there a score at this position?
-		if (_event_raw.compare(i, 2, "-H") == 0) {
-			//This is a homerun
-			//cout << "Runner Scored!" << endl;
-			runs++;
-		}
-	}
-	return runs;
-}
-
 //EXPLANATION OF PLAY LINE FROM : http://www.retrosheet.org/datause.txt 4/15/16
 //play      The play records contain the events of the game.Each
 //play record has 7 fields.
