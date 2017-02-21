@@ -30,14 +30,14 @@ int main()
 		//Print Players
 		db.printPlayerList();
 
-		//Print Plays
-		db.printPlayList();
-
 		//Print averages
 		db.printAllBattingAverages();
 
 		//Print slugging
 		db.printAllSluggingPercentages();
+
+		//Print Plays
+		db.printPlayList();
 
 	} catch (std::exception& e) {
 		//Print exception information

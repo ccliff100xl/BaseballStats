@@ -43,6 +43,7 @@ public:
 	}
 	/////////////
 	// Methods to get information from object
+	int getInning() const { return _inning; }
 	TeamType getTeam() const { return _team; }
 	std::string getBatterID() const { return _player_id; }
 	std::string getEventRaw() const { return _event_raw; }

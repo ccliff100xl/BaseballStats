@@ -150,13 +150,16 @@
   <ItemGroup>
     <ClInclude Include="ActivePlayer.h" />
     <ClInclude Include="BaseballDatabase.h" />
+    <ClInclude Include="BaserunnerMovement.h" />
     <ClInclude Include="CsvBasedObject.h" />
+    <ClInclude Include="Event.h" />
     <ClInclude Include="EventInterpretation.h" />
     <ClInclude Include="FileBasedObject.h" />
     <ClInclude Include="GameLog.h" />
     <ClInclude Include="GameSet.h" />
     <ClInclude Include="GameState.h" />
     <ClInclude Include="InfoItem.h" />
+    <ClInclude Include="ModifierInterpretation.h" />
     <ClInclude Include="Play.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayRecord.h" />
@@ -171,12 +174,15 @@
   <ItemGroup>
     <ClCompile Include="BaseballDatabase.cpp" />
     <ClCompile Include="BaseballStats.cpp" />
+    <ClCompile Include="BaserunnerMovement.cpp" />
     <ClCompile Include="CsvBasedObject.cpp" />
+    <ClCompile Include="Event.cpp" />
     <ClCompile Include="EventInterpretation.cpp" />
     <ClCompile Include="FileBasedObject.cpp" />
     <ClCompile Include="GameLog.cpp" />
     <ClCompile Include="GameSet.cpp" />
     <ClCompile Include="GameState.cpp" />
+    <ClCompile Include="ModifierInterpretation.cpp" />
     <ClCompile Include="Play.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayRecord.cpp" />

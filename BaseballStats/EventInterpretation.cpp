@@ -48,7 +48,6 @@ bool operator==(const EventInterpretation& event_interpretation_, const std::str
 
 //$ means one number, $$ means two numbers
 //source: http://www.retrosheet.org/eventfile.htm
-//TODO: Need to add modifier for sacrifice to the play
 const std::vector<EventInterpretation> EventInterpretation::InterpretationArray = {
 	EventInterpretation("S", BattingResult::SINGLE),
 	EventInterpretation("D", BattingResult::DOUBLE),
@@ -65,7 +64,7 @@ const std::vector<EventInterpretation> EventInterpretation::InterpretationArray 
 	EventInterpretation("NP", BattingResult::NO_PLAY), //NP is used for substitutions
 	EventInterpretation("C", BattingResult::CATCHER_INTERFERENCE), //Catcher interference
 	EventInterpretation("BK", BattingResult::NO_PLAY), //Balk
-	EventInterpretation("CS", BattingResult::NO_PLAY), //Caught Stealing
+	EventInterpretation("CS", BattingResult::CAUGHT_STEALING), //Caught Stealing
 	EventInterpretation("DI", BattingResult::NO_PLAY), //Defensive indiference
 	EventInterpretation("OA", BattingResult::NO_PLAY), //Unknown baserunner advance
 	EventInterpretation("PB", BattingResult::NO_PLAY), //Passed ball

@@ -1,5 +1,6 @@
 #include "PlayRecord.h"
 #include "EventInterpretation.h"
+#include "ModifierInterpretation.h"
 #include "BaseballDatabase.h"
 #include <boost/algorithm/string.hpp>
 #include <ctype.h>
@@ -8,13 +9,13 @@ using namespace std;
 
 //Create from a pointer to a play object
 //baserunners_ holds runner on first, second, and third at start of play
-PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * const game_, const BaseballDatabase* const db_) : Play(*play_) , _state(*state_), _game(game_), _db(db_)
+PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * const game_, const BaseballDatabase* const db_) : Play(*play_) , _state(*state_), _event(play_), _game(game_), _db(db_)
 {
 	//Add batter
 	addBatter(_db->getPlayers());
 
-	//Parse play
-	_batting_result = parseBattingResult(getEventRaw());
+	//Parse modified
+	ParseModifiersToVector(getEventRaw(), _modifiers);
 
 	//Determine if it was a sacrifce
 	_sacrifice = parseSacrifice(getEventRaw());
@@ -34,16 +35,6 @@ void PlayRecord::addBatter(const vector<Player>& players_)
 			break;
 		}
 	}
-}
-
-BattingResult PlayRecord::parseBattingResult(string play_string_)
-{
-	for (auto&& e : EventInterpretation::InterpretationArray) {
-		if (e == play_string_) return e.getBattingResult();
-	}
-	cout << play_string_ << " not recognized" << endl;
-	throw exception("Play not recognized");
-	return BattingResult::NOT_RECOGNIZED;
 }
 
 bool PlayRecord::parseSacrifice(std::string play_string_)
@@ -68,20 +59,57 @@ bool PlayRecord::parseSacrifice(std::string play_string_)
 	}
 }
 
+void PlayRecord::ParseModifiersToVector(std::string play_string_, std::vector<PlayModifier>& modifiers_)
+{
+	//Parse text after /
+	vector<string> line_parsed;
+	boost::split(line_parsed, play_string_, boost::is_any_of("/"));
+
+	//If length is less than 2, nothing to do
+	if (line_parsed.size() < 2) return;
+
+	//Length > 2 means there are modifiers to parse
+	//Loop over inputs and possible matches
+	for(int i_s = 1; i_s < line_parsed.size(); i_s++)
+	{
+		bool match_found = false;
+		const string modifier_string_in = line_parsed[i_s];
+		for (auto&& m : ModifierInterpretation::InterpretationArray) {
+			if (m == modifier_string_in) {
+				modifiers_.push_back(m.getModifier());
+				match_found = true;
+				break;
+			}
+		}
+		//Make sure a match was found
+		if (!match_found) {
+			cout << modifier_string_in << " not recognized" << endl;
+			throw exception("Modifier not recognized");
+		}
+	}
+}
+
 ostream & operator<<(ostream & os, const PlayRecord & p)
 {
-	os << " " << *(p.getBatter()) << " " << BattingResultString[p._batting_result] << " " << p.getLineRaw();
+	//This prints the raw line, for debug
+	//os << " " << *(p.getBatter()) << " " << BattingResultString[p._batting_result] << " " << p.getLineRaw();
+	//Print starting state of play (will always give it's own newline)
+	os << std::endl << p._state;
+	//Print what the batter did
+	os << " " << *(p.getBatter()) << " " << BattingResultString[p.getBattingResult()];
+	//DEBUG print the raw line
+	os << std::endl << "   " << p.getLineRaw();
 	return os;
 }
 
-//Get the number of at bats
+//Just the definition of each result
 int PlayRecord::getNumberAtBats() const
 {
 	//If this is a sacrifice, it's not an at bat
 	if (_sacrifice) return 0;
 	
 	//Check if this was a valid at bat
-	switch (_batting_result) {
+	switch (getBattingResult()) {
 	case ERROR:
 	case GROUND_OUT: 
 	case FLY_OUT:
@@ -96,23 +124,26 @@ int PlayRecord::getNumberAtBats() const
 	case WALK:
 	case NO_PLAY:
 	case CATCHER_INTERFERENCE:
+	case CAUGHT_STEALING:
 		//These are not at bats
 		return 0;
 	default:
-		cout << "Play " << BattingResultString[_batting_result] << " not recognized by getNumberAtBats" << endl;
+		cout << "Play " << BattingResultString[getBattingResult()] << " not recognized by getNumberAtBats" << endl;
 		throw exception("Error in getNumberAtBats");
 	}
 
 	//Should never be here
 	return -1;
 }
+
+//Just the definition of each result
 int PlayRecord::getNumberHits() const
 {
 	//If this is a sacrifice, it's not a hit
 	if (_sacrifice) return 0;
 
 	//Check if this was a hit
-	switch (_batting_result) {
+	switch (getBattingResult()) {
 	case SINGLE:
 	case DOUBLE:
 	case TRIPLE:
@@ -127,16 +158,18 @@ int PlayRecord::getNumberHits() const
 	case NO_PLAY:
 	case FIELDERS_CHOICE:
 	case CATCHER_INTERFERENCE:
+	case CAUGHT_STEALING:
 		//These are no thits
 		return 0;
 	default:
-		cout << "Play " << BattingResultString[_batting_result] << " not recognized by getNumberAtBats" << endl;
+		cout << "Play " << BattingResultString[getBattingResult()] << " not recognized by getNumberAtBats" << endl;
 		throw exception("Error in getNumberHits");
 	}
 	//Should never be here
 	return -1;
 }
 
+//Should this be moved to Event?
 int PlayRecord::getNumberBases() const
 {
 	//Base this on num hits, to avoid code duplication
@@ -146,7 +179,7 @@ int PlayRecord::getNumberBases() const
 	}
 	
 	//If it makes it here it was a hit, check which one
-	switch (_batting_result) {
+	switch (getBattingResult()) {
 	case SINGLE:
 		return 1;
 	case DOUBLE:
@@ -156,9 +189,64 @@ int PlayRecord::getNumberBases() const
 	case HR:
 		return 4;
 	default:
-		cout << "Play " << BattingResultString[_batting_result] << " not recognized by getNumberBases" << endl;
+		cout << "Play " << BattingResultString[getBattingResult()] << " not recognized by getNumberBases" << endl;
 		throw exception("Error in getNumberBases");
 	}
 	//Should never be here
 	return -1;
+}
+
+//Will return 1 if batter scores an earned run, 0 for anything else
+//I think this is only possible if it's a homerun
+bool PlayRecord::didBatterScoreEarnedRun() const
+{
+	if (_event.getRunsScored() == 0) {
+		return false;
+	}
+	else if (_event.getRunsScored() == 1) {
+		return true;
+	}
+	else {
+		throw exception("Error in PlayRecord::didBatterScoreEarnedRun: invalid number of runs");
+	}
+}
+
+int PlayRecord::getOutsFromEvent() const
+{
+	return _event.getOutsMade();
+}
+
+//Should be updated by Event
+bool PlayRecord::didBatterGetOnWithoutHit() const
+{
+	//Check if batter got in, but was not credited with a hit
+	switch (getBattingResult()) {
+	case SINGLE:
+	case DOUBLE:
+	case TRIPLE:
+	case HR:
+	case NO_PLAY:
+	case STRIKE_OUT:
+	case GROUND_OUT:
+	case FLY_OUT:
+	case CAUGHT_STEALING:
+		//Not on without hit
+		return false;
+	case FIELDERS_CHOICE:
+	case WALK:
+	case ERROR:
+	case CATCHER_INTERFERENCE:
+		//on without hit
+		return true;
+	default:
+		cout << "Play " << BattingResultString[getBattingResult()] << " not recognized by didBatterGetOnWithoutHit" << endl;
+		throw exception("Error in didBatterGetOnWithoutHit");
+	}
+	//Should never be here
+	return false;
+}
+
+void PlayRecord::debugPrintDatabasePlays() const
+{
+	_db->printPlayList();
 }

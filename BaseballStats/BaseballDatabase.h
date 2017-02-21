@@ -1,9 +1,11 @@
 #pragma once
 #include <vector>
 #include "TeamSet.h"
-#include "GameSet.h"
 #include "Player.h"
 #include "PlayRecord.h"
+
+class GameSet;
+
 class BaseballDatabase
 {
 	const TeamSet _teams;

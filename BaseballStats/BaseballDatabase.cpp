@@ -1,4 +1,5 @@
 #include "BaseballDatabase.h"
+#include "GameSet.h"
 #include <algorithm>
 #include <iomanip>
 
