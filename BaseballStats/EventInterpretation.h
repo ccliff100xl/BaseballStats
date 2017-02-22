@@ -10,13 +10,13 @@ class EventInterpretation
 	//This is the string pattern at the beginning of the event which must match
 	const std::string _log_pattern;
 	//This is the result which will be assigned to the play
-	const BattingResult _batting_result;
+	const EventResult _batting_result;
 public:
-	EventInterpretation(std::string log_pattern_, BattingResult batting_result_) :
+	EventInterpretation(std::string log_pattern_, EventResult batting_result_) :
 		_log_pattern(log_pattern_) ,
 		_batting_result(batting_result_) {}
 
-	BattingResult getBattingResult() const { return _batting_result; }
+	EventResult getBattingResult() const { return _batting_result; }
 
 	friend bool operator==(const std::string log_pattern_, const EventInterpretation& event_interpretation_);
 	friend bool operator==(const EventInterpretation& event_interpretation_, const std::string log_pattern_);

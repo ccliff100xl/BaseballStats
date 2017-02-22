@@ -8,7 +8,7 @@ enum TeamType { TEAM_VISITOR = 0, TEAM_HOME = 1  };
 
 //Define Batting Results, these are not just batting results I guess, should be called event result
 //or something
-enum BattingResult {
+enum EventResult {
 	GROUND_OUT,
 	FLY_OUT,
 	STRIKE_OUT,
@@ -22,12 +22,14 @@ enum BattingResult {
 	NO_PLAY,
 	ERROR,
 	FIELDERS_CHOICE,
+	STOLEN_BASE,
+	NUMERIC_UNCERTAIN, //This may be GROUND_OUT, FLY_OUT, etc.  Determined in Event::Event()
 	NOT_RECOGNIZED,
 	NOT_PARSED
 };
 
 //Define readable names for batting results
-static std::map< BattingResult, const char * > BattingResultString = {
+static std::map< EventResult, const char * > BattingResultString = {
 	{ GROUND_OUT, "Ground Out" },
 	{ FLY_OUT, "Fly Out" },
 	{ STRIKE_OUT, "Strike Out" },
@@ -40,9 +42,11 @@ static std::map< BattingResult, const char * > BattingResultString = {
 	{ HR, "Home Run" },
 	{ NO_PLAY, "No Play" },
 	{ FIELDERS_CHOICE, "Fielders Choice" },
+	{ STOLEN_BASE, "Stolen Base" },
 	{ ERROR, "Error" },
-	{ NOT_RECOGNIZED, "." },
-	{ NOT_PARSED, "NOT_PARSED" }
+	{ NUMERIC_UNCERTAIN, "<NUMERIC_UNCERTAIN>" },
+	{ NOT_RECOGNIZED, "<NOT_RECOGNIZED>" },
+	{ NOT_PARSED, "<NOT_PARSED>" }
 };
 
 enum HalfInning {

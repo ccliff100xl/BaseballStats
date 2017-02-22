@@ -1,6 +1,7 @@
 #include "EventInterpretation.h"
 #include <boost/algorithm/string/erase.hpp>
 #include <iostream>
+#include <ctype.h>
 using namespace std;
 bool operator==(const std::string log_pattern_, const EventInterpretation & event_interpretation_)
 {
@@ -15,15 +16,9 @@ bool operator==(const std::string log_pattern_, const EventInterpretation & even
 	//Chech if the first char string of event_string is a digit
 	//'$' is code for digit
 	if (event_string[0] == '$') {
-		//Check if the second char is a digit
-		if (event_string[1] == '$') {
-			//Must have two digits at beginning of log_pattern_
-			return (isdigit(log_pattern[0]) && isdigit(log_pattern[1]));
-		} 
-		else {
-			//Must have one digits at beginning of log_pattern_ (not two)
-			return (isdigit(log_pattern[0]) && !isdigit(log_pattern[1]));
-		}
+		//If log char 0 is digit, it's a match
+		//Non-zero result means true for isdigit
+		return (isdigit(log_pattern[0]) != 0);
 	}
 
 	//If it makes it here, the event_string is char(s), get leading string from log_pattern
@@ -49,29 +44,28 @@ bool operator==(const EventInterpretation& event_interpretation_, const std::str
 //$ means one number, $$ means two numbers
 //source: http://www.retrosheet.org/eventfile.htm
 const std::vector<EventInterpretation> EventInterpretation::InterpretationArray = {
-	EventInterpretation("S", BattingResult::SINGLE),
-	EventInterpretation("D", BattingResult::DOUBLE),
-	EventInterpretation("DGR", BattingResult::DOUBLE), //Ground rule double
-	EventInterpretation("T", BattingResult::TRIPLE),
-	EventInterpretation("HR", BattingResult::HR),
-	EventInterpretation("K", BattingResult::STRIKE_OUT),
-	EventInterpretation("E", BattingResult::ERROR),
-	EventInterpretation("FC", BattingResult::FIELDERS_CHOICE),
-	EventInterpretation("W", BattingResult::WALK),
-	EventInterpretation("I", BattingResult::WALK),
-	EventInterpretation("IW", BattingResult::WALK),
-	EventInterpretation("HP", BattingResult::WALK),
-	EventInterpretation("NP", BattingResult::NO_PLAY), //NP is used for substitutions
-	EventInterpretation("C", BattingResult::CATCHER_INTERFERENCE), //Catcher interference
-	EventInterpretation("BK", BattingResult::NO_PLAY), //Balk
-	EventInterpretation("CS", BattingResult::CAUGHT_STEALING), //Caught Stealing
-	EventInterpretation("DI", BattingResult::NO_PLAY), //Defensive indiference
-	EventInterpretation("OA", BattingResult::NO_PLAY), //Unknown baserunner advance
-	EventInterpretation("PB", BattingResult::NO_PLAY), //Passed ball
-	EventInterpretation("WP", BattingResult::NO_PLAY), //Wild pitch
-	EventInterpretation("PO", BattingResult::NO_PLAY), //Picked off
-	EventInterpretation("POCS", BattingResult::NO_PLAY), //Picked off (caught stealing)
-	EventInterpretation("SB", BattingResult::NO_PLAY), //Stolen Base
-	EventInterpretation("$", BattingResult::FLY_OUT),
-	EventInterpretation("$$", BattingResult::GROUND_OUT),
+	EventInterpretation("$", EventResult::NUMERIC_UNCERTAIN), //This is the ONLY one that should start with $
+	EventInterpretation("S", EventResult::SINGLE),
+	EventInterpretation("D", EventResult::DOUBLE),
+	EventInterpretation("DGR", EventResult::DOUBLE), //Ground rule double
+	EventInterpretation("T", EventResult::TRIPLE),
+	EventInterpretation("HR", EventResult::HR),
+	EventInterpretation("K", EventResult::STRIKE_OUT),
+	EventInterpretation("E", EventResult::ERROR),
+	EventInterpretation("FC", EventResult::FIELDERS_CHOICE),
+	EventInterpretation("W", EventResult::WALK),
+	EventInterpretation("I", EventResult::WALK),
+	EventInterpretation("IW", EventResult::WALK),
+	EventInterpretation("HP", EventResult::WALK),
+	EventInterpretation("NP", EventResult::NO_PLAY), //NP is used for substitutions
+	EventInterpretation("C", EventResult::CATCHER_INTERFERENCE), //Catcher interference
+	EventInterpretation("BK", EventResult::NO_PLAY), //Balk
+	EventInterpretation("CS", EventResult::CAUGHT_STEALING), //Caught Stealing
+	EventInterpretation("DI", EventResult::NO_PLAY), //Defensive indiference
+	EventInterpretation("OA", EventResult::NO_PLAY), //Unknown baserunner advance
+	EventInterpretation("PB", EventResult::NO_PLAY), //Passed ball
+	EventInterpretation("WP", EventResult::NO_PLAY), //Wild pitch
+	EventInterpretation("PO", EventResult::NO_PLAY), //Picked off
+	EventInterpretation("POCS", EventResult::NO_PLAY), //Picked off (caught stealing)
+	EventInterpretation("SB", EventResult::STOLEN_BASE), //Stolen Base
 };

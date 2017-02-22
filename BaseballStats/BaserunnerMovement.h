@@ -10,9 +10,9 @@
 
 class BaserunnerMovement
 {
-	const int _base_start;
-	const int _base_end;
-	const bool _made_out;
+    int _base_start;
+    int _base_end;
+    bool _made_out;
     bool _run_scored = false;
 public:
 	//Construct with everything but _run_scored, that is calculated
@@ -23,6 +23,7 @@ public:
 	int getEndingBase() const { return _base_end; }
 	bool wasOutMade() const { return _made_out; }
 	bool wasRunScored() const { return _run_scored;  }
-
 };
 
+//This function will compare baserunner movements for vector sorting
+bool baserunnerMovementCompare(const BaserunnerMovement& m1_, const BaserunnerMovement& m2_);

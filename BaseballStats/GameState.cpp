@@ -64,17 +64,18 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	//play, 3, 0, fielc001, 00, X, S7 / L7LD.3 - H; 2 - H; BX2(7E4)
 	std::string event_string = play_->getEventRaw();
 
-	//TODO: Totally re-write the following to use the BaserunnerMovement class
-	//Then combine the new objects with those from _event and process them uniformly
-
-	//Make initial vector of BaserunnerMovement
-	//Baserunner needs to move before event line is added
-	std::vector<BaserunnerMovement> _movements; 
+	//Get movements from event, then add to them
+	std::vector<BaserunnerMovement> movements = play_->getBaserunnerMovements();
 
 	//Find . to add explicit runner location updates (2-3 or 2X3)
 	std::vector<std::string> line_parsed_period;
 	boost::split(line_parsed_period, event_string, boost::is_any_of("."));
 
+	////Use this to find a specific play
+	//std::string event_check = "62(3)/FO/G.2-3;1-2";
+	//if (event_string == event_check) {
+	//	std::cout << "FOUND " << event_check << std::endl;
+	//}
 
 	//Add to baserunner movements
 	if (line_parsed_period.size() > 1) {
@@ -147,15 +148,12 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 			}
 
 			//Add BaserunnerMovement to vector
-			_movements.push_back(BaserunnerMovement(base_start, base_end, made_out));
+			movements.push_back(BaserunnerMovement(base_start, base_end, made_out));
 		}
 	}
 
-	//Add the movements from the event line at the end
-	const std::vector<BaserunnerMovement>& movements_event = play_->getBaserunnerMovements();
-	for (auto&& m : movements_event) {
-		_movements.push_back(m);
-	}
+	//Sort movements vectore before applying
+	sort(movements.begin(), movements.end(), baserunnerMovementCompare);
 
 	//Actually move the baserunners
 	const Player* br1 = _baserunner_1;
@@ -163,7 +161,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	const Player* br3 = _baserunner_3;
 
 	//Loop over movements, hopefully order of operations doesn't matter
-	for (auto&& m : _movements) {
+	for (auto&& m : movements) {
 
 		//Determine starting player, and clear base of starting player
 		const Player* p_start = NULL;

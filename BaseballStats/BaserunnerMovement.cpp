@@ -19,3 +19,8 @@ BaserunnerMovement::BaserunnerMovement(int base_start_, int base_end_, bool made
 		_run_scored = true;
 	}
 }
+
+bool baserunnerMovementCompare(const BaserunnerMovement& m1_, const BaserunnerMovement& m2_)
+{
+	return m1_.getStartingBase() > m2_.getStartingBase();
+}

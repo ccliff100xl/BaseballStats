@@ -38,7 +38,6 @@ public:
 	int getNumberBases() const;
 
 	bool didBatterScoreEarnedRun() const;
-	bool didBatterGetOnWithoutHit() const;
 	int getOutsFromEvent() const;
 
 	//Make operator definition a friend
@@ -57,6 +56,6 @@ private:
 	static bool parseSacrifice(std::string play_string_);
 
 	//For printing
-	BattingResult getBattingResult() const { return _event.getBattingResult(); }
+	EventResult getBattingResult() const { return _event.getBattingResult(); }
 };
 

@@ -83,6 +83,7 @@ void PlayRecord::ParseModifiersToVector(std::string play_string_, std::vector<Pl
 		}
 		//Make sure a match was found
 		if (!match_found) {
+			cout << "Line: " << play_string_ << endl;
 			cout << modifier_string_in << " not recognized" << endl;
 			throw exception("Modifier not recognized");
 		}
@@ -95,10 +96,20 @@ ostream & operator<<(ostream & os, const PlayRecord & p)
 	//os << " " << *(p.getBatter()) << " " << BattingResultString[p._batting_result] << " " << p.getLineRaw();
 	//Print starting state of play (will always give it's own newline)
 	os << std::endl << p._state;
+
 	//Print what the batter did
 	os << " " << *(p.getBatter()) << " " << BattingResultString[p.getBattingResult()];
 	//DEBUG print the raw line
 	os << std::endl << "   " << p.getLineRaw();
+
+	//Throw error if it's in an unknown result
+	EventResult br = p.getBattingResult();
+	if (br == NUMERIC_UNCERTAIN || br == NOT_RECOGNIZED || br == NOT_PARSED) {
+		//Add endl before error because it won't be added by caller
+		os << std::endl;
+		throw exception("Invalid batting result");
+	}
+
 	return os;
 }
 
@@ -125,6 +136,7 @@ int PlayRecord::getNumberAtBats() const
 	case NO_PLAY:
 	case CATCHER_INTERFERENCE:
 	case CAUGHT_STEALING:
+	case STOLEN_BASE:
 		//These are not at bats
 		return 0;
 	default:
@@ -159,6 +171,7 @@ int PlayRecord::getNumberHits() const
 	case FIELDERS_CHOICE:
 	case CATCHER_INTERFERENCE:
 	case CAUGHT_STEALING:
+	case STOLEN_BASE:
 		//These are no thits
 		return 0;
 	default:
@@ -214,36 +227,6 @@ bool PlayRecord::didBatterScoreEarnedRun() const
 int PlayRecord::getOutsFromEvent() const
 {
 	return _event.getOutsMade();
-}
-
-//Should be updated by Event
-bool PlayRecord::didBatterGetOnWithoutHit() const
-{
-	//Check if batter got in, but was not credited with a hit
-	switch (getBattingResult()) {
-	case SINGLE:
-	case DOUBLE:
-	case TRIPLE:
-	case HR:
-	case NO_PLAY:
-	case STRIKE_OUT:
-	case GROUND_OUT:
-	case FLY_OUT:
-	case CAUGHT_STEALING:
-		//Not on without hit
-		return false;
-	case FIELDERS_CHOICE:
-	case WALK:
-	case ERROR:
-	case CATCHER_INTERFERENCE:
-		//on without hit
-		return true;
-	default:
-		cout << "Play " << BattingResultString[getBattingResult()] << " not recognized by didBatterGetOnWithoutHit" << endl;
-		throw exception("Error in didBatterGetOnWithoutHit");
-	}
-	//Should never be here
-	return false;
 }
 
 void PlayRecord::debugPrintDatabasePlays() const
