@@ -61,9 +61,13 @@ bool PlayRecord::parseSacrifice(std::string play_string_)
 
 void PlayRecord::ParseModifiersToVector(std::string play_string_, std::vector<PlayModifier>& modifiers_)
 {
-	//Parse text after /
+	//Parse up to ".", which is the end of the modifiers
+	vector<string> line_parsed_period;
+	boost::split(line_parsed_period, play_string_, boost::is_any_of("."));
+
+	//Parse text after / from text before "." found above
 	vector<string> line_parsed;
-	boost::split(line_parsed, play_string_, boost::is_any_of("/"));
+	boost::split(line_parsed, line_parsed_period[0], boost::is_any_of("/"));
 
 	//If length is less than 2, nothing to do
 	if (line_parsed.size() < 2) return;
