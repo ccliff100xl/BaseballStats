@@ -27,17 +27,23 @@ int main()
 		//Create database
 		BaseballDatabase db(&ts, &gs);
 
+		//Run everyting (sort of a systest)
 		//Print Players
-		//db.printPlayerList();
-
+		std::cout << std::endl << "PLAYERS" << std::endl;
+		db.printPlayerList();
 		//Print averages
-		//db.printAllBattingAverages();
-
+		std::cout << std::endl << "BATTING AVERAGES" << std::endl;
+		db.printAllBattingAverages();
 		//Print slugging
-		//db.printAllSluggingPercentages();
-
+		std::cout << std::endl << "SLUGGING PERCENTAGES" << std::endl;
+		db.printAllSluggingPercentages();
 		//Print Plays
-		//db.printPlayList();
+		std::cout << std::endl << "PLAYS" << std::endl;
+		db.printPlayList();
+
+		//Make another database to see printing when it happens
+		std::cout << std::endl << "DATABASE CREATION" << std::endl;
+		BaseballDatabase db2(&ts, &gs);
 
 	} catch (std::exception& e) {
 		//Print exception information

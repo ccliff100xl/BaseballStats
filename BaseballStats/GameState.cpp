@@ -8,6 +8,14 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
+GameState::GameState(const GameLog* log_) : _log(log_) {
+	//Initialize vector to length 4, all NULL
+	_offensive_players.push_back(NULL);
+	_offensive_players.push_back(NULL);
+	_offensive_players.push_back(NULL);
+	_offensive_players.push_back(NULL);
+}
+
 void GameState::updateStateFromPlay(const PlayRecord* play_)
 {
 	//Make sure state of object matches play_
@@ -45,10 +53,10 @@ void GameState::updateStateFromPlay(const PlayRecord* play_)
 		//This is the end of the half-inning, reset
 		_outs = 0;
 		//Set all _offensive_players to NULL
-		_batter = NULL;
-		_baserunner_1 = NULL;
-		_baserunner_2 = NULL;
-		_baserunner_3 = NULL;
+		_offensive_players[0] = NULL;
+		_offensive_players[1] = NULL;
+		_offensive_players[2] = NULL;
+		_offensive_players[3] = NULL;
 		if (_inning_half == INNING_TOP) {
 			_inning_half = INNING_BOTTOM;
 		}
@@ -65,14 +73,12 @@ void GameState::updateStateFromPlay(const PlayRecord* play_)
 	//Common string to add errors to
 	std::string error_info;
 
-	//Is a player on multiple bases?
-	const int N_BASERUNNERS = 3;
-	const Player* baserunners[N_BASERUNNERS] = { _baserunner_1, _baserunner_2, _baserunner_3 };
-	for (int i_p1 = 0; i_p1 < N_BASERUNNERS; i_p1++) {
+	//Is a player on multiple bases, start search a 1 (don't check batter)
+	for (int i_p1 = 1; i_p1 < _offensive_players.size(); i_p1++) {
 		//If i_p1 is NULL, continue
-		if (baserunners[i_p1] == NULL) continue;
-		for (int i_p2 = i_p1+1; i_p2 < N_BASERUNNERS; i_p2++) {
-			if (baserunners[i_p1] == baserunners[i_p2]) {
+		if (_offensive_players[i_p1] == NULL) continue;
+		for (int i_p2 = i_p1+1; i_p2 < _offensive_players.size(); i_p2++) {
+			if (_offensive_players[i_p1] == _offensive_players[i_p2]) {
 				error_info.append("Baserunner on multiple bases");
 			}
 		}
@@ -232,9 +238,9 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	sort(movements.begin(), movements.end(), baserunnerMovementCompare);
 
 	//Actually move the baserunners
-	const Player* br1 = _baserunner_1;
-	const Player* br2 = _baserunner_2;
-	const Player* br3 = _baserunner_3;
+	const Player* br1 = _offensive_players[1];
+	const Player* br2 = _offensive_players[2];
+	const Player* br3 = _offensive_players[3];
 
 	//Loop over movements, hopefully order of operations doesn't matter
 	for (auto&& m : movements) {
@@ -243,19 +249,19 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 		const Player* p_start = NULL;
 		switch (m.getStartingBase()) {
 		case 0:
-			p_start = _batter;
+			p_start = _offensive_players[0];
 			break;
 		case 1:
 			p_start = br1;
-			_baserunner_1 = NULL;
+			_offensive_players[1] = NULL;
 			break;
 		case 2:
 			p_start = br2;
-			_baserunner_2 = NULL;
+			_offensive_players[2] = NULL;
 			break;
 		case 3:
 			p_start = br3;
-			_baserunner_3 = NULL;
+			_offensive_players[3] = NULL;
 			break;
 		default:
 			std::cout << "GameState::updateBaserunners: " << m.getStartingBase() << std::endl;
@@ -279,13 +285,13 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 			//It's an advance, update baserunners
 			switch (m.getEndingBase()) {
 			case 1:
-				_baserunner_1 = p_start;
+				_offensive_players[1] = p_start;
 				break;
 			case 2:
-				_baserunner_2 = p_start;
+				_offensive_players[2] = p_start;
 				break;
 			case 3:
-				_baserunner_3 = p_start;
+				_offensive_players[3] = p_start;
 				break;
 			case 4:
 				//Make sure the object thinks a run was scored
@@ -334,14 +340,14 @@ std::ostream& operator<<(std::ostream & os_, const GameState & gs_)
 	//Print outs
 	os_ << " Outs: " << gs_._outs << std::endl;
 	//Print runners
-	if (gs_._baserunner_1) {
-		os_ << "  " << *(gs_._baserunner_1) << " on first base " << std::endl;
+	if (gs_._offensive_players[1]) {
+		os_ << "  " << *(gs_._offensive_players[1]) << " on first base " << std::endl;
 	}
-	if (gs_._baserunner_2) {
-		os_ << "  " << *(gs_._baserunner_2) << " on second base " << std::endl;
+	if (gs_._offensive_players[2]) {
+		os_ << "  " << *(gs_._offensive_players[2]) << " on second base " << std::endl;
 	}
-	if (gs_._baserunner_3) {
-		os_ << "  " << *(gs_._baserunner_3) << " on third base " << std::endl;
+	if (gs_._offensive_players[3]) {
+		os_ << "  " << *(gs_._offensive_players[3]) << " on third base " << std::endl;
 	}
 	return os_;
 }

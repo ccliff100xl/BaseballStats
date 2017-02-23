@@ -10,19 +10,14 @@ class GameLog;
 //This class will hold the state of the game: score, inning, batter, baserunners...
 class GameState
 {
-	//Players involved
-	const Player* _batter = NULL;
-	const Player* _baserunner_1 = NULL; //Runner of first
-	const Player* _baserunner_2 = NULL; //Runner of second
-	const Player* _baserunner_3 = NULL; //Runner of third
+	//Offensive players, could be fixed length array but I do not want to worry about copying
+	// [0] batter
+	// [1] runner on first 
+	// [2] runner on second 
+	// [3] runner on third
+	std::vector<const Player*> _offensive_players;
 
-	//Something like this is better, but still needs to work for copying
-	////Offensive players
-	//// [0] batter
-	//// [1] runner on first 
-	//// [2] runner on second 
-	//// [3] runner on third
-	//std::vector<const Player*> _offensive_players;
+	//TODO: Add defensive players
 
 	//Keep pointer to gamelog for basic information
 	const GameLog* _log;
@@ -40,16 +35,16 @@ class GameState
 
 public:
 	//Create based on log
-	GameState(const GameLog* log_) : _log(log_) { }
+	GameState(const GameLog* log_);
 
 	//Method which does most of the work
 	void updateStateFromPlay(const PlayRecord* play_);
 
 	//Accessors
-	const Player* getBatter() const { return _batter; }
+	const Player* getBatter() const { return _offensive_players[0]; }
 
 	//Setters
-	void setBatter(const Player* batter_) { _batter = batter_; }
+	void setBatter(const Player* batter_) { _offensive_players[0] = batter_; }
 
 	//Print game informaion
 	void printGameInfo() const;
