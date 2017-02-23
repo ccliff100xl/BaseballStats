@@ -5,6 +5,7 @@
 class Player;
 class Team;
 class PlayRecord;
+class GameLog;
 
 //This class will hold the state of the game: score, inning, batter, baserunners...
 class GameState
@@ -23,9 +24,8 @@ class GameState
 	//// [3] runner on third
 	//std::vector<const Player*> _offensive_players;
 
-	//Teams Invoved
-	const Team* _visiting_team = NULL;
-	const Team* _home_team = NULL;
+	//Keep pointer to gamelog for basic information
+	const GameLog* _log;
 
 	//Outs
 	int _outs = 0;
@@ -39,6 +39,9 @@ class GameState
 	int _runs_home = 0;
 
 public:
+	//Create based on log
+	GameState(const GameLog* log_) : _log(log_) { }
+
 	//Method which does most of the work
 	void updateStateFromPlay(const PlayRecord* play_);
 
@@ -47,9 +50,13 @@ public:
 
 	//Setters
 	void setBatter(const Player* batter_) { _batter = batter_; }
-	
+
+	//Print game informaion
+	void printGameInfo() const;
+
 	//Define operators as friends 
 	friend std::ostream& operator<<(std::ostream & os_, const GameState & gs_);
+
 private:
 	//Methods called by updateStateFromPlay
 	void updateBaserunners(const PlayRecord* play_);

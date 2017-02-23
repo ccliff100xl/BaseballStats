@@ -1,5 +1,8 @@
+#include "stdafx.h"
 #include "GameState.h"
+#include "GameLog.h"
 #include "PlayRecord.h"
+#include "Team.h"
 #include <string>
 #include <vector>
 #include <iostream>
@@ -54,6 +57,35 @@ void GameState::updateStateFromPlay(const PlayRecord* play_)
 			_inning++;
 			_inning_half = INNING_TOP;
 		}
+	}
+
+	//////////////////////////////
+	//Do sanity checks to find errors in design
+	
+	//Common string to add errors to
+	std::string error_info;
+
+	//Is a player on multiple bases?
+	const int N_BASERUNNERS = 3;
+	const Player* baserunners[N_BASERUNNERS] = { _baserunner_1, _baserunner_2, _baserunner_3 };
+	for (int i_p1 = 0; i_p1 < N_BASERUNNERS; i_p1++) {
+		//If i_p1 is NULL, continue
+		if (baserunners[i_p1] == NULL) continue;
+		for (int i_p2 = i_p1+1; i_p2 < N_BASERUNNERS; i_p2++) {
+			if (baserunners[i_p1] == baserunners[i_p2]) {
+				error_info.append("Baserunner on multiple bases");
+			}
+		}
+	}
+	
+	//Was an error found
+	if (error_info.length() > 0) {
+		//Print plays
+		play_->debugPrintDatabasePlays();
+		//Print error details
+		std::cout << error_info << std::endl;
+		//Error out
+		throw std::exception("Consistency error found in GameState::updateStateFromPlay");
 	}
 }
 
@@ -143,12 +175,56 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 				base_end = 4;
 				break;
 			default:
-				std::cout << "GameState::updateStateFromPlay: " << m_str[2] << std::endl;
-				throw std::exception("GameState::updateStateFromPlay movement invalid end");
+				std::cout << "GameState::updateBaserunners: " << m_str[2] << std::endl;
+				throw std::exception("GameState::updateBaserunners movement invalid end");
+			}
+
+			//Now, check if there is more information
+			StringVector line_parsed_details = SplitStringToVector(m_str, "()");
+			//Get rid of first element, since it's the standard movement
+			line_parsed_details.erase(line_parsed_details.begin());
+			bool is_error = false;
+			for(auto&& details : line_parsed_details){
+				//Check if this detail is an error
+				if (details[0] == 'E') {
+					//Add error to 
+					is_error = true;
+				}
 			}
 
 			//Add BaserunnerMovement to vector
-			movements.push_back(BaserunnerMovement(base_start, base_end, made_out));
+			movements.push_back(BaserunnerMovement(base_start, base_end, made_out, is_error));
+		}
+	}
+
+	//Loop over movements, make sure none of them have the same starting base
+	//unless it's the batter and there is an error
+	for (int i_m1 = 0; i_m1 < movements.size(); i_m1++) {
+		for (int i_m2 = i_m1+1; i_m2 < movements.size(); i_m2++) {
+			if (movements[i_m1].getStartingBase() == movements[i_m2].getStartingBase()) {
+				if (movements[i_m1].getStartingBase() != 0) {
+					throw std::exception("GameState::updateBaserunners: Multiple movements for one player that is not batter");
+				}
+				if (!movements[i_m1].wasError() && !movements[i_m2].wasError()) {
+					throw std::exception("GameState::updateBaserunners: Multiple movements without error");
+				}
+				//Delete the movement with the lower ending base
+				if (movements[i_m1].getEndingBase() < movements[i_m2].getEndingBase()) {
+					//Delete i_m1
+					movements.erase(movements.begin()+ i_m1);
+					//Decrease i_m1 so cell is not skipped
+					--i_m1;
+				}
+				else if (movements[i_m1].getEndingBase() > movements[i_m2].getEndingBase()) {
+					//Delete i_m2
+					movements.erase(movements.begin() + i_m2);
+					//Decrease i_m2 so cell is not skipped
+					--i_m2;
+				}
+				else {
+					throw std::exception("GameState::updateBaserunners: Identical movements encountered");
+				}
+			}
 		}
 	}
 
@@ -239,6 +315,13 @@ void GameState::addRunScored()
 	else {
 		throw std::exception("GameState::addRunScored invalid _inning_half");
 	}
+}
+
+//This will print the score, mostly for verification
+void GameState::printGameInfo() const 
+{
+	std::cout << _log->getVisitorTeamID() <<" "<< _runs_visitor <<" ";
+	std::cout << _log->getHomeTeamID() << " " << _runs_home << std::endl;
 }
 
 //Print everything possible from this object

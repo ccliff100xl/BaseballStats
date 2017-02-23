@@ -1,10 +1,11 @@
 #include "BaserunnerMovement.h"
 #include <iostream>
 
-BaserunnerMovement::BaserunnerMovement(int base_start_, int base_end_, bool made_out_) :
+BaserunnerMovement::BaserunnerMovement(int base_start_, int base_end_, bool made_out_, bool is_error_) :
 	_base_start(base_start_),
 	_base_end(base_end_),
-	_made_out(made_out_)
+	_made_out(made_out_),
+    _is_error(is_error_)
 {
 	//Make sure bases are valid
 	if (_base_start != 0 && _base_start != 1 && _base_start != 2 && _base_start != 3) {

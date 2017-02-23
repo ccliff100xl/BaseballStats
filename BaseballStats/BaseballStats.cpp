@@ -28,16 +28,16 @@ int main()
 		BaseballDatabase db(&ts, &gs);
 
 		//Print Players
-		db.printPlayerList();
+		//db.printPlayerList();
 
 		//Print averages
-		db.printAllBattingAverages();
+		//db.printAllBattingAverages();
 
 		//Print slugging
-		db.printAllSluggingPercentages();
+		//db.printAllSluggingPercentages();
 
 		//Print Plays
-		db.printPlayList();
+		//db.printPlayList();
 
 	} catch (std::exception& e) {
 		//Print exception information

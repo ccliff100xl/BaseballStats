@@ -49,10 +49,12 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_) : _te
 
 		// Loop over all plays and copy
 		// This temporary object will be used to track the state of the game
-		GameState state;
+		GameState state(&game);
 		for (auto&& play : game.getPlays()) {
 			_plays.push_back(PlayRecord(&play, &state, &game, this));
 		}
+		//Print final game informtation from state
+		state.printGameInfo();
 	}
 }
 

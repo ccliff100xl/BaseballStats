@@ -14,15 +14,20 @@ class BaserunnerMovement
     int _base_end;
     bool _made_out;
     bool _run_scored = false;
+	bool _is_error = false;
 public:
 	//Construct with everything but _run_scored, that is calculated
-	BaserunnerMovement(int base_start_, int base_end_, bool made_out_ = false);
+	BaserunnerMovement(int base_start_, 
+		int base_end_, 
+		bool made_out_ = false, 
+		bool is_error_ = false);
 
 	//Accessor
 	int getStartingBase() const { return _base_start; }
 	int getEndingBase() const { return _base_end; }
 	bool wasOutMade() const { return _made_out; }
 	bool wasRunScored() const { return _run_scored;  }
+	bool wasError() const { return _is_error; }
 };
 
 //This function will compare baserunner movements for vector sorting

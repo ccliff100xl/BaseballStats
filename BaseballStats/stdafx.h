@@ -9,7 +9,12 @@
 
 #include <stdio.h>
 #include <tchar.h>
+#include <string>
+#include <vector>
 
-
+//This is used a lot, make it a type
+typedef std::vector<std::string> StringVector;
+//Also, make a function to create it
+StringVector SplitStringToVector(const std::string str_, const char* delims_);
 
 // TODO: reference additional headers your program requires here
