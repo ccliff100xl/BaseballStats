@@ -33,3 +33,8 @@ StringVector SplitStringToVector(const std::string str_, const char* delims_)
 	//Return vector without empties
 	return string_parsed;
 }
+
+int char2int(char c_)
+{
+	return c_ - '0';
+}

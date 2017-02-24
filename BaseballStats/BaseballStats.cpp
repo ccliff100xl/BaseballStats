@@ -7,7 +7,19 @@
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
 
-#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
+//TODO: 2/23/17
+//Failing with more info after K+ as unrecognized play
+
+//2014 World Series
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
+
+//2016 Oakland A's
+#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2016RS\\2016OAK.EVA"
+
+//2016 Giants
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2016RS\\2016SFN.EVN"
+
+//Common to all 
 #define TEAM_LIST_FILE  "TeamList.txt"
 
 using namespace std;

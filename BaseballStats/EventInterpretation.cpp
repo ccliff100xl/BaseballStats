@@ -47,25 +47,27 @@ const std::vector<EventInterpretation> EventInterpretation::InterpretationArray 
 	EventInterpretation("$", EventResult::NUMERIC_UNCERTAIN), //This is the ONLY one that should start with $
 	EventInterpretation("S", EventResult::SINGLE),
 	EventInterpretation("D", EventResult::DOUBLE),
-	EventInterpretation("DGR", EventResult::DOUBLE), //Ground rule double
+	EventInterpretation("DGR", EventResult::GROUND_RULE_DOUBLE),
 	EventInterpretation("T", EventResult::TRIPLE),
 	EventInterpretation("HR", EventResult::HR),
+	EventInterpretation("H", EventResult::HR), //H or HR may be in log
 	EventInterpretation("K", EventResult::STRIKE_OUT),
 	EventInterpretation("E", EventResult::ERROR),
 	EventInterpretation("FC", EventResult::FIELDERS_CHOICE),
+	EventInterpretation("FLE", EventResult::ERROR_ON_FOUL_BALL),
 	EventInterpretation("W", EventResult::WALK),
 	EventInterpretation("I", EventResult::WALK),
-	EventInterpretation("IW", EventResult::WALK),
-	EventInterpretation("HP", EventResult::WALK),
+	EventInterpretation("IW", EventResult::INTENTIONAL_WALK),
+	EventInterpretation("HP", EventResult::HIT_BY_PITCH),
 	EventInterpretation("NP", EventResult::NO_PLAY), //NP is used for substitutions
-	EventInterpretation("C", EventResult::CATCHER_INTERFERENCE), //Catcher interference
-	EventInterpretation("BK", EventResult::NO_PLAY), //Balk
-	EventInterpretation("CS", EventResult::CAUGHT_STEALING), //Caught Stealing
-	EventInterpretation("DI", EventResult::NO_PLAY), //Defensive indiference
-	EventInterpretation("OA", EventResult::NO_PLAY), //Unknown baserunner advance
-	EventInterpretation("PB", EventResult::NO_PLAY), //Passed ball
-	EventInterpretation("WP", EventResult::NO_PLAY), //Wild pitch
-	EventInterpretation("PO", EventResult::NO_PLAY), //Picked off
-	EventInterpretation("POCS", EventResult::NO_PLAY), //Picked off (caught stealing)
-	EventInterpretation("SB", EventResult::STOLEN_BASE), //Stolen Base
+	EventInterpretation("C", EventResult::CATCHER_INTERFERENCE),
+	EventInterpretation("BK", EventResult::BALK),
+	EventInterpretation("CS", EventResult::CAUGHT_STEALING), 
+	EventInterpretation("DI", EventResult::DEFENSIVE_INDIFFERENCE), 
+	EventInterpretation("OA", EventResult::UNKNOWN_ADVANCE),
+	EventInterpretation("PB", EventResult::PASSED_BALL),
+	EventInterpretation("WP", EventResult::WILD_PITCH),
+	EventInterpretation("PO", EventResult::PICKED_OFF),
+	EventInterpretation("POCS", EventResult::PICKED_OFF_CAUGHT_STEALING),
+	EventInterpretation("SB", EventResult::STOLEN_BASE),
 };

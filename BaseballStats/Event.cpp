@@ -1,4 +1,5 @@
 #include "Event.h"
+#include "stdafx.h"
 #include "Play.h"
 #include "EventInterpretation.h"
 #include <iostream>
@@ -33,13 +34,7 @@ Event::Event(const Play* play_)
 		//$(B)$(%) followed by the modifier LDP is used to indicate a lined into double play.
 
 		//Seperate string based on locations of ( )
-		vector<string> event_parsed;
-		boost::split(event_parsed, event_string, boost::is_any_of("()"));
-		//It's possible that the final cell is empty (if ")" is the last char)
-		//If so, remove it
-		if (event_parsed.back().size() == 0) {
-			event_parsed.pop_back();
-		}
+		const StringVector event_parsed = SplitStringToVector(event_string, "()");
 	    const size_t n_cell = event_parsed.size();
 
 		//If there is a single cell, it's easy to handle
@@ -50,9 +45,17 @@ Event::Event(const Play* play_)
 				_outs_made++;
 			}
 			else {
-				//Multiple numbers is a ground ball, represent with movement
+				//Multiple numbers is a ground ball
 				_batting_result = GROUND_OUT;
-				_baserunner_movements.push_back(BaserunnerMovement(0, 1, true));
+				//But, there could be an error, search for E
+				if (event_parsed[0].find_first_of('E') != string::npos) {
+					//There was an error, hitter goes to first with no out
+					_baserunner_movements.push_back(BaserunnerMovement(0, 1, false));
+				}
+				else {
+					//No error, batter is out
+					_baserunner_movements.push_back(BaserunnerMovement(0, 1, true));
+				}
 			}
 		}
 		else if (n_cell == 2) {
@@ -96,11 +99,39 @@ Event::Event(const Play* play_)
 	case CAUGHT_STEALING:
 		_outs_made++;
 		break;
+	case PICKED_OFF_CAUGHT_STEALING:
+	{
+		//Need to determine which runner was picked off
+		const int i_base_out = char2int(event_string[4]);
+		//It seems like the base given is where the out is made as he's stealing, so 
+		//he's coming from one before
+		_baserunner_movements.push_back(BaserunnerMovement(i_base_out-1, i_base_out, true));
+	}
+	break;
+	case PICKED_OFF:
+	{
+		//Need to determine which runner was picked off
+		const int i_base_out = char2int(event_string[2]);
+		//Movement (with no movement) but with out
+		_baserunner_movements.push_back(BaserunnerMovement(i_base_out, i_base_out, true));
+		//But, was there an error? TODO: Make this a seperate function
+		const StringVector event_parsed = SplitStringToVector(event_string, "()");
+		if (event_parsed.size() > 1) {
+			//There is something in parantheses, check if first char is 'E'
+			if (event_parsed[1][0] == 'E') {
+				//Found an error, get rid of BaserunnerMovement just added
+				_baserunner_movements.pop_back();
+				//Failed pickoff results in to baserunner movement
+			}
+		}
+	}
+	break;
 	case SINGLE:
 		//Add movement from batter to 1
 		_baserunner_movements.push_back(BaserunnerMovement(0, 1));
 		break;
 	case DOUBLE:
+	case GROUND_RULE_DOUBLE:
 		//Add movement from batter to 2
 		_baserunner_movements.push_back(BaserunnerMovement(0, 2));
 		break;
@@ -114,9 +145,15 @@ Event::Event(const Play* play_)
 		break;
 	case ERROR:
 		//Add movement from batter to first, single error is just one base
+		_baserunner_movements.push_back(BaserunnerMovement(0, 1, false, true));
+		break;
+	case FIELDERS_CHOICE:
+		//Batter got on
 		_baserunner_movements.push_back(BaserunnerMovement(0, 1));
 		break;
 	case WALK:
+	case HIT_BY_PITCH:
+	case INTENTIONAL_WALK:
 		//Add movement from batter to first for walk
 		_baserunner_movements.push_back(BaserunnerMovement(0, 1));
 		break;
