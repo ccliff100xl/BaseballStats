@@ -22,7 +22,7 @@ bool operator==(const std::string log_pattern_, const EventInterpretation & even
 	}
 
 	//If it makes it here, the event_string is char(s), get leading string from log_pattern
-	const size_t i_digit = log_pattern.find_first_of("0123456789/.");
+	const size_t i_digit = log_pattern.find_first_of("0123456789/.+");
 	//Make sure i_digit is > 0, or it's definitely not a match
 	if (i_digit < 1) return false;
 	//Get substring from log

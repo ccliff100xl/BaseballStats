@@ -121,7 +121,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 		std::vector<std::string> line_parsed_semi;
 		boost::split(line_parsed_semi, line_parsed_period[1], boost::is_any_of(";"));
 		for (auto&& m_str : line_parsed_semi) {
-			//Only three chars need to be parsed
+			//There will always be three basic chars
 			//0 : starting base
 			//1 : - safe advance, X out
 			//2 : ending base
@@ -208,12 +208,18 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	for (int i_m1 = 0; i_m1 < movements.size(); i_m1++) {
 		for (int i_m2 = i_m1+1; i_m2 < movements.size(); i_m2++) {
 			if (movements[i_m1].getStartingBase() == movements[i_m2].getStartingBase()) {
-				if (movements[i_m1].getStartingBase() != 0) {
-					throw std::exception("GameState::updateBaserunners: Multiple movements for one player that is not batter");
+
+				//Non-batters can only advance on errors
+				if (movements[i_m1].getStartingBase() != 0 && 
+					(!movements[i_m1].wasError() && !movements[i_m2].wasError())) {
+					throw std::exception("GameState::updateBaserunners: Multiple movements for one player that is not batter without error");
 				}
-				if (!movements[i_m1].wasError() && !movements[i_m2].wasError()) {
-					throw std::exception("GameState::updateBaserunners: Multiple movements without error");
-				}
+
+				//This is not correct, runners can advance on throws to other bases (for example)
+				//if (!movements[i_m1].wasError() && !movements[i_m2].wasError()) {
+				//	throw std::exception("GameState::updateBaserunners: Multiple movements without error");
+				//}
+
 				//Delete the movement with the lower ending base
 				if (movements[i_m1].getEndingBase() < movements[i_m2].getEndingBase()) {
 					//Delete i_m1

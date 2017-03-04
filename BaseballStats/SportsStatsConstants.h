@@ -80,6 +80,7 @@ enum HalfInning {
 // "Play modifiers and explanations" from http://www.retrosheet.org/eventfile.htm
 enum PlayModifier {
 	PM_AP,    //appeal play
+	PM_BF,    //bunt foul (strike out)
 	PM_BG,    //ground ball bunt
 	PM_BGDP,  //bunt grounded into double play
 	PM_BINT,  //batter interference
@@ -127,8 +128,8 @@ enum PlayModifier {
 
 //Define readable names for batting results
 static std::map< PlayModifier, const char * > PlayModifierString = {
-	//{ GROUND_OUT, "Ground Out" },
 	{ PM_AP,    "appeal play" },
+	{ PM_BF,    "bunt foul" },
 	{ PM_BG,    "ground ball bunt" },
 	{ PM_BGDP,  "bunt grounded into double play" },
 	{ PM_BINT,  "batter interference" },

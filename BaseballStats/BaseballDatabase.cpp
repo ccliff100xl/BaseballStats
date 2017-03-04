@@ -89,10 +89,18 @@ void BaseballDatabase::printPlayerList() const
 	}
 }
 
-void BaseballDatabase::printPlayList() const
+//Will print all plays if n_plays_ < 0 (Default)
+//Otherwise, it will print the n_plays_ most recent plays
+void BaseballDatabase::printPlayList(int n_plays_) const
 {
-	for (auto&& p : _plays) {
-		cout << p << endl;
+   //Update n_plays if needed
+	if (n_plays_ < 0) {
+		n_plays_ = _plays.size();
+	}
+
+	//Print plays
+	for (int ip = _plays.size() - n_plays_; ip < _plays.size(); ip++) {
+		cout << _plays[ip] << endl;
 	}
 }
 

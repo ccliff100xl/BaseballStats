@@ -53,6 +53,7 @@ bool operator==(const ModifierInterpretation& modifier_interpretation_, const st
 //Actual hit locations are not saved
 const std::vector<ModifierInterpretation> ModifierInterpretation::InterpretationArray = {
 	ModifierInterpretation("AP",PM_AP), //appeal play
+	ModifierInterpretation("BF",PM_BF), //bunt foul (K)
 	ModifierInterpretation("BG",PM_BG), //ground ball bunt
 	ModifierInterpretation("BGDP",PM_BGDP), //bunt grounded into double play
 	ModifierInterpretation("BINT",PM_BINT), //batter interference

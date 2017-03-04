@@ -19,7 +19,7 @@ public:
 	const Player getPlayer( const std::string player_id_ ) const;
 
 	void printPlayerList() const;
-	void printPlayList() const;
+	void printPlayList(int n_plays = -1) const;
 	void printAllBattingAverages() const;
 	void printAllSluggingPercentages() const;
 

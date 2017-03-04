@@ -235,5 +235,6 @@ int PlayRecord::getOutsFromEvent() const
 
 void PlayRecord::debugPrintDatabasePlays() const
 {
-	_db->printPlayList();
+	//Only print 100 plays
+	_db->printPlayList(100);
 }

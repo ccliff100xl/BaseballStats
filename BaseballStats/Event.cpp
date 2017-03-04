@@ -8,18 +8,26 @@
 
 using namespace std;
 
-//Construct the object from a Play*
-Event::Event(const Play* play_) 
+//Construct the object from a Play* or event_string_
+//If event_string_ != NULL, then it is used instead of play to define event_string
+Event::Event(const Play* play_, const string* event_string_)
 {
-	//Parse the batting result
-	_batting_result = parseBattingResult(play_->getEventRaw());
-
-	//Parse event string
-	vector<string> line_parsed;
-	boost::split(line_parsed, play_->getEventRaw(), boost::is_any_of("/"));
-	const string event_string = line_parsed[0];
+	string event_string;
+	//Check if string is coming directly from input, ot Play
+	if (event_string_ != NULL) {
+		//Direct from input
+		event_string = *event_string_;
+	}
+	else {
+		//From play
+		const StringVector line_parsed = SplitStringToVector(play_->getEventRaw(), "/");
+		event_string = line_parsed[0];
+	}
 	const size_t n_chars_event = event_string.size();
-	
+
+	//Parse the batting result
+	_batting_result = parseBattingResult(event_string);
+
 	//Do additional parsing based on batting result
 	switch (_batting_result) {
 		//These results should not be set yet
@@ -94,7 +102,45 @@ Event::Event(const Play* play_)
 	}
 	break;
 	case STRIKE_OUT:
+	{
 		_outs_made++;
+		//But, other plays can happen (they will be after a plus sign)
+		const StringVector strikeout_parsed = SplitStringToVector(event_string, "+");
+		//If there is more than one cell, then there is a play
+		if (strikeout_parsed.size() > 1) {
+			//Parse additional play
+			Event event_2(play_, &(strikeout_parsed[1]));
+			//TODO: Check that this is a valid result
+			//The event can be SB%, CS%, OA, PO%, PB, WP and E$.
+			const EventResult result_2 = event_2.getBattingResult();
+			if (result_2 != STOLEN_BASE &&
+				result_2 != UNKNOWN_ADVANCE &&
+				result_2 != PICKED_OFF &&
+				result_2 != WILD_PITCH &&
+				result_2 != PASSED_BALL &&
+				result_2 != ERROR) {
+				//This is not allowed
+				std::cout << "Result: " << BattingResultString[result_2] << std::endl;
+				throw exception("K+Event not allowed");
+			}
+
+			//Add whatever happened in that event to this one
+			_baserunner_movements.insert(std::end(_baserunner_movements), 
+				std::begin(event_2._baserunner_movements), std::end(event_2._baserunner_movements));
+			
+			//Add runs from event (is it possible?)
+
+			//Add/Subtract outs from event
+			//If this was a wild pitch, or passed ball, subtract the out, the baserunner movement should handle it
+			if (result_2 == WILD_PITCH || result_2 == PASSED_BALL) {
+				_outs_made--;
+			}
+			
+		}
+		else if (strikeout_parsed.size() > 2) {
+			throw exception("Event::Event: strikeout_parsed has size > 2");
+		}
+	}
 		break;
 	case CAUGHT_STEALING:
 		_outs_made++;

@@ -22,7 +22,7 @@ public:
 	std::vector<BaserunnerMovement> getBaserunnerMovements() const { return _baserunner_movements; }
 
 	//Construct from Play object
-	Event(const Play* play_);
+	Event(const Play* play_, const std::string* event_string_ = NULL);
 private:
 	static EventResult parseBattingResult(const std::string event_string_);
 };
