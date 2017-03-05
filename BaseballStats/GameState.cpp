@@ -35,11 +35,7 @@ void GameState::updateStateFromPlay(const PlayRecord* play_)
 		throw std::exception("GameState::updateStateFromPlay: Inning half missmatch (visitor/bottom)");
 	}
 
-	//Add a run if the batter scores earned runs
-	if (play_->didBatterScoreEarnedRun()) addRunScored();
-	_outs += play_->getOutsFromEvent();
-
-	//Update baserunners (may add runs or outs)
+	//Update baserunners, this does everything
 	updateBaserunners(play_);
 
 	//Check if there are more than three outs
@@ -110,7 +106,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	boost::split(line_parsed_period, event_string, boost::is_any_of("."));
 
 	////Use this to find a specific play
-	//std::string event_check = "62(3)/FO/G.2-3;1-2";
+	//std::string event_check = "K+SB3;SB2";
 	//if (event_string == event_check) {
 	//	std::cout << "FOUND " << event_check << std::endl;
 	//}
@@ -190,11 +186,13 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 			//Get rid of first element, since it's the standard movement
 			line_parsed_details.erase(line_parsed_details.begin());
 			bool is_error = false;
+			//Loop over all details
 			for(auto&& details : line_parsed_details){
-				//Check if this detail is an error
-				if (details[0] == 'E') {
-					//Add error to 
-					is_error = true;
+				//Check if ANY char in the detail is an error
+				for (auto&& c : details) {
+					if (c == 'E') {
+						is_error = true;
+					}
 				}
 			}
 
@@ -209,11 +207,11 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 		for (int i_m2 = i_m1+1; i_m2 < movements.size(); i_m2++) {
 			if (movements[i_m1].getStartingBase() == movements[i_m2].getStartingBase()) {
 
-				//Non-batters can only advance on errors
-				if (movements[i_m1].getStartingBase() != 0 && 
-					(!movements[i_m1].wasError() && !movements[i_m2].wasError())) {
-					throw std::exception("GameState::updateBaserunners: Multiple movements for one player that is not batter without error");
-				}
+				////Not True: Non-batters can only advance on errors
+				//if (movements[i_m1].getStartingBase() != 0 && 
+				//	(!movements[i_m1].wasError() && !movements[i_m2].wasError())) {
+				//	throw std::exception("GameState::updateBaserunners: Multiple movements for one player that is not batter without error");
+				//}
 
 				//This is not correct, runners can advance on throws to other bases (for example)
 				//if (!movements[i_m1].wasError() && !movements[i_m2].wasError()) {
@@ -233,7 +231,27 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 					//Decrease i_m2 so cell is not skipped
 					--i_m2;
 				}
+				else if (movements[i_m1].getStartingBase() == 0 &&
+					movements[i_m1].getEndingBase() == 4) {
+					//This is likely an inside the park homerun, make sure
+					if (play_->getEventResult() != HR) {
+						play_->debugPrintDatabasePlays();
+						throw std::exception("GameState::updateBaserunners: Identical batter to home without HR");
+					}
+					//This is OK, delete 2nd movement
+					movements.erase(movements.begin() + i_m2);
+					//Decrease i_m2 so cell is not skipped
+					--i_m2;
+				}
+				else if (movements[i_m1].getStartingBase() == 0 && play_->getEventResult() == FIELDERS_CHOICE) {
+					//Fielder's choice sometimes explicitly moves runner and sometime doesn't
+					//In this case it does, so delete redundant movement
+					movements.erase(movements.begin() + i_m2);
+					//Decrease i_m2 so cell is not skipped
+					--i_m2;
+				}
 				else {
+					play_->debugPrintDatabasePlays();
 					throw std::exception("GameState::updateBaserunners: Identical movements encountered");
 				}
 			}

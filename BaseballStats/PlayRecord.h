@@ -30,15 +30,15 @@ public:
 	const Player* getBatter() const { return _state.getBatter(); }
 	std::vector<BaserunnerMovement> getBaserunnerMovements() const { return _event.getBaserunnerMovements(); }
 
+	//Get result of event
+	EventResult getEventResult() const { return _event.getBattingResult(); }
+
 	//These functions are a little funny, they are counts but will only return 1 or 0
 	int getNumberAtBats() const;
 	int getNumberHits() const;
 
 	//For slugging and determing where the batter ended up
 	int getNumberBases() const;
-
-	bool didBatterScoreEarnedRun() const;
-	int getOutsFromEvent() const;
 
 	//Make operator definition a friend
 	friend std::ostream& operator<<(std::ostream & os, const PlayRecord & t);

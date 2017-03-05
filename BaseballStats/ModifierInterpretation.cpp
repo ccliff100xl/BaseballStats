@@ -67,6 +67,7 @@ const std::vector<ModifierInterpretation> ModifierInterpretation::Interpretation
 	ModifierInterpretation("COUF",PM_COUF), //courtesy fielder
 	ModifierInterpretation("COUR",PM_COUR), //courtesy runner
 	ModifierInterpretation("DP",PM_DP), //unspecified double play
+	ModifierInterpretation("E",PM_E), //error 
 	ModifierInterpretation("F",PM_F), //fly
 	ModifierInterpretation("FDP",PM_FDP), //fly ball double play
 	ModifierInterpretation("FINT",PM_FINT), //fan interference

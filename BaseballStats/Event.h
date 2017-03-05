@@ -7,18 +7,19 @@ class Play;
 
 //This will hold the information in the "event" portion of the play
 // See "The event field of the play record" http://www.retrosheet.org/eventfile.htm
+// All results stored as baserunner movements, outs and runs are not tracked explicitely
 class Event
 {
 	EventResult _batting_result = NOT_PARSED;
-	int _outs_made = 0;
-	int _runs_scored = 0;
+	//int _outs_made = 0;
+	//int _runs_scored = 0;
 	std::vector<BaserunnerMovement> _baserunner_movements;
 
 public:
 	//Accessors
 	EventResult getBattingResult() const { return _batting_result; }
-	int getOutsMade() const { return _outs_made;  }
-	int getRunsScored() const { return _runs_scored; }
+	//int getOutsMade() const { return _outs_made;  }
+	//int getRunsScored() const { return _runs_scored; }
 	std::vector<BaserunnerMovement> getBaserunnerMovements() const { return _baserunner_movements; }
 
 	//Construct from Play object

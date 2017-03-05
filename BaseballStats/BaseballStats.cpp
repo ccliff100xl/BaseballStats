@@ -7,9 +7,6 @@
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
 
-//TODO: 2/23/17
-//Failing with more info after K+ as unrecognized play
-
 //2014 World Series
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
 

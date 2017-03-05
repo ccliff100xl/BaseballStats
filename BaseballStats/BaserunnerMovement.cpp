@@ -8,11 +8,20 @@ BaserunnerMovement::BaserunnerMovement(int base_start_, int base_end_, bool made
     _is_error(is_error_)
 {
 	//Make sure bases are valid
+	//Cannot go backwards
+	if (_base_start > _base_end) {
+		throw std::exception("BaserunnerMovement::BaserunnerMovement: base start > base end");
+	}
+	//Cannot start as 4 (which means scored at home)
 	if (_base_start != 0 && _base_start != 1 && _base_start != 2 && _base_start != 3) {
 		throw std::exception("BaserunnerMovement::BaserunnerMovement: Invalid base start");
 	}
-	if (base_end_ != 1 && base_end_ != 2 && base_end_ != 3 && base_end_ != 4) {
-		throw std::exception("BaserunnerMovement::BaserunnerMovement: Invalid base end");
+	//Cannot end at 0, unless there is an out
+	if (_base_end != 1 && _base_end != 2 && _base_end != 3 && _base_end != 4) {
+		//Is _base_end = 0 and out, this is OK
+		if (!(_base_end == 0 && _made_out)) {
+			throw std::exception("BaserunnerMovement::BaserunnerMovement: Invalid base end");
+		}
 	}
 
 	//Determine if run was scored

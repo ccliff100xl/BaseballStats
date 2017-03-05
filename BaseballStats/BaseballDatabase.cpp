@@ -93,13 +93,17 @@ void BaseballDatabase::printPlayerList() const
 //Otherwise, it will print the n_plays_ most recent plays
 void BaseballDatabase::printPlayList(int n_plays_) const
 {
+	//Get total number of plays
+	const int n_plays_total = (int)_plays.size();
+
    //Update n_plays if needed
 	if (n_plays_ < 0) {
-		n_plays_ = _plays.size();
+		n_plays_ = n_plays_total;
 	}
 
 	//Print plays
-	for (int ip = _plays.size() - n_plays_; ip < _plays.size(); ip++) {
+
+	for (int ip = n_plays_total - n_plays_; ip < n_plays_total; ip++) {
 		cout << _plays[ip] << endl;
 	}
 }

@@ -25,6 +25,12 @@ Event::Event(const Play* play_, const string* event_string_)
 	}
 	const size_t n_chars_event = event_string.size();
 
+	////DEBUG: Use this to find a specific play
+	//std::string event_check = "K+SB3;SB2";
+	//if (event_string == event_check) {
+	//	std::cout << "FOUND " << event_check << std::endl;
+	//}
+
 	//Parse the batting result
 	_batting_result = parseBattingResult(event_string);
 
@@ -50,7 +56,8 @@ Event::Event(const Play* play_, const string* event_string_)
 			if (event_parsed[0].size() == 1) {
 				//Length one, can only be a fly ball
 				_batting_result = FLY_OUT;
-				_outs_made++;
+				//Since he flew out, he got out at home
+				_baserunner_movements.push_back(BaserunnerMovement(0, 0, true));
 			}
 			else {
 				//Multiple numbers is a ground ball
@@ -99,21 +106,37 @@ Event::Event(const Play* play_, const string* event_string_)
 			//Batter out
 			_baserunner_movements.push_back(BaserunnerMovement(0, 1, true));
 		}
+		else if (n_cell == 4) {
+			//4 cells, grounded into double play, but batter probably got on
+			_batting_result = GROUND_OUT;
+			//Figure out who got out
+			const int baserunner_out_1 = atoi(event_parsed[1].c_str());
+			const int baserunner_out_2 = atoi(event_parsed[3].c_str());
+			//Add the movements
+			_baserunner_movements.push_back(BaserunnerMovement(baserunner_out_1, baserunner_out_1 + 1, true));
+			_baserunner_movements.push_back(BaserunnerMovement(baserunner_out_2, baserunner_out_2 + 1, true));
+			//Batter got on (if it was not one of the listed movements)
+			if (baserunner_out_1 != 0 && baserunner_out_2 != 0) {
+				_baserunner_movements.push_back(BaserunnerMovement(0, 1));
+			}
+		}
 	}
 	break;
 	case STRIKE_OUT:
 	{
-		_outs_made++;
-		//But, other plays can happen (they will be after a plus sign)
-		const StringVector strikeout_parsed = SplitStringToVector(event_string, "+");
+		//Strike out is an out at the plate
+		_baserunner_movements.push_back(BaserunnerMovement(0, 0, true));
+		//Parse information seperated by + or ; , but before '.' eg. "K+SB3;SB2.2-H(E5)(NR);1-3"
+		const StringVector strikeout_parsed = SplitStringToVector(event_string, ".");
+		const StringVector additional_plays_parsed = SplitStringToVector(strikeout_parsed[0], "+;");
 		//If there is more than one cell, then there is a play
-		if (strikeout_parsed.size() > 1) {
+		for (int i_play = 1; i_play < additional_plays_parsed.size(); i_play++) {
 			//Parse additional play
-			Event event_2(play_, &(strikeout_parsed[1]));
-			//TODO: Check that this is a valid result
-			//The event can be SB%, CS%, OA, PO%, PB, WP and E$.
+			Event event_2(play_, &(additional_plays_parsed[i_play]));
+			//Check that result is valid, based on what has been seen and makes sense
 			const EventResult result_2 = event_2.getBattingResult();
 			if (result_2 != STOLEN_BASE &&
+				result_2 != CAUGHT_STEALING &&
 				result_2 != UNKNOWN_ADVANCE &&
 				result_2 != PICKED_OFF &&
 				result_2 != WILD_PITCH &&
@@ -125,25 +148,28 @@ Event::Event(const Play* play_, const string* event_string_)
 			}
 
 			//Add whatever happened in that event to this one
-			_baserunner_movements.insert(std::end(_baserunner_movements), 
+			_baserunner_movements.insert(std::end(_baserunner_movements),
 				std::begin(event_2._baserunner_movements), std::end(event_2._baserunner_movements));
-			
-			//Add runs from event (is it possible?)
-
-			//Add/Subtract outs from event
-			//If this was a wild pitch, or passed ball, subtract the out, the baserunner movement should handle it
-			if (result_2 == WILD_PITCH || result_2 == PASSED_BALL) {
-				_outs_made--;
-			}
-			
-		}
-		else if (strikeout_parsed.size() > 2) {
-			throw exception("Event::Event: strikeout_parsed has size > 2");
 		}
 	}
 		break;
 	case CAUGHT_STEALING:
-		_outs_made++;
+		//Determine which baserunner got out
+		if (event_string[2] == '2') {
+			//Out from 1 to 2
+			_baserunner_movements.push_back(BaserunnerMovement(1, 2, true));
+		} else if (event_string[2] == '3') {
+			//Out from 2 to 3
+			_baserunner_movements.push_back(BaserunnerMovement(2, 3, true));
+		} else if (event_string[2] == 'H') {
+			//Out from 3 to H
+			_baserunner_movements.push_back(BaserunnerMovement(3, 4, true));
+		}
+		else {
+			//Nothing else allowed
+			std::cout << event_string << std::endl;
+			throw std::exception("Event::Event: Invalid stolen base");
+		}
 		break;
 	case PICKED_OFF_CAUGHT_STEALING:
 	{
@@ -200,6 +226,7 @@ Event::Event(const Play* play_, const string* event_string_)
 	case WALK:
 	case HIT_BY_PITCH:
 	case INTENTIONAL_WALK:
+	case CATCHER_INTERFERENCE:
 		//Add movement from batter to first for walk
 		_baserunner_movements.push_back(BaserunnerMovement(0, 1));
 		break;

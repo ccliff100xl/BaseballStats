@@ -94,7 +94,7 @@ enum PlayModifier {
 	PM_COUF,  //courtesy fielder
 	PM_COUR,  //courtesy runner
 	PM_DP,    //unspecified double play
-	//PM_E$,    //error on $
+	PM_E,     //error on $
 	PM_F,     //fly
 	PM_FDP,   //fly ball double play
 	PM_FINT,  //fan interference
@@ -143,6 +143,7 @@ static std::map< PlayModifier, const char * > PlayModifierString = {
 	{ PM_COUF,  "courtesy fielder" },
 	{ PM_COUR,  "courtesy runner" },
 	{ PM_DP,    "unspecified double play" },
+	{ PM_E,     "error" },
 	{ PM_F,     "fly" },
 	{ PM_FDP,   "fly ball double play" },
 	{ PM_FINT,  "fan interference" },

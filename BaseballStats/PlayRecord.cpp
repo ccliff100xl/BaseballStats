@@ -131,6 +131,7 @@ int PlayRecord::getNumberAtBats() const
 	case STRIKE_OUT: 
 	case SINGLE:
 	case DOUBLE:
+	case GROUND_RULE_DOUBLE:
 	case TRIPLE:
 	case HR:
 	case FIELDERS_CHOICE:
@@ -141,6 +142,16 @@ int PlayRecord::getNumberAtBats() const
 	case CATCHER_INTERFERENCE:
 	case CAUGHT_STEALING:
 	case STOLEN_BASE:
+	case PICKED_OFF_CAUGHT_STEALING:
+	case PICKED_OFF:
+	case HIT_BY_PITCH:
+	case WILD_PITCH:
+	case INTENTIONAL_WALK:
+	case PASSED_BALL:
+	case BALK:
+	case DEFENSIVE_INDIFFERENCE:
+	case UNKNOWN_ADVANCE:
+	case ERROR_ON_FOUL_BALL:
 		//These are not at bats
 		return 0;
 	default:
@@ -162,6 +173,7 @@ int PlayRecord::getNumberHits() const
 	switch (getBattingResult()) {
 	case SINGLE:
 	case DOUBLE:
+	case GROUND_RULE_DOUBLE:
 	case TRIPLE:
 	case HR:
 		//These are all valid at bats, return 1
@@ -176,10 +188,20 @@ int PlayRecord::getNumberHits() const
 	case CATCHER_INTERFERENCE:
 	case CAUGHT_STEALING:
 	case STOLEN_BASE:
-		//These are no thits
+	case PICKED_OFF_CAUGHT_STEALING:
+	case PICKED_OFF:
+	case HIT_BY_PITCH:
+	case WILD_PITCH:
+	case INTENTIONAL_WALK:
+	case PASSED_BALL:
+	case BALK:
+	case DEFENSIVE_INDIFFERENCE:
+	case UNKNOWN_ADVANCE:
+	case ERROR_ON_FOUL_BALL:
+		//These are not hits
 		return 0;
 	default:
-		cout << "Play " << BattingResultString[getBattingResult()] << " not recognized by getNumberAtBats" << endl;
+		cout << "Play " << BattingResultString[getBattingResult()] << " not recognized by getNumberHits" << endl;
 		throw exception("Error in getNumberHits");
 	}
 	//Should never be here
@@ -200,6 +222,7 @@ int PlayRecord::getNumberBases() const
 	case SINGLE:
 		return 1;
 	case DOUBLE:
+	case GROUND_RULE_DOUBLE:
 		return 2;
 	case TRIPLE:
 		return 3;
@@ -213,28 +236,8 @@ int PlayRecord::getNumberBases() const
 	return -1;
 }
 
-//Will return 1 if batter scores an earned run, 0 for anything else
-//I think this is only possible if it's a homerun
-bool PlayRecord::didBatterScoreEarnedRun() const
-{
-	if (_event.getRunsScored() == 0) {
-		return false;
-	}
-	else if (_event.getRunsScored() == 1) {
-		return true;
-	}
-	else {
-		throw exception("Error in PlayRecord::didBatterScoreEarnedRun: invalid number of runs");
-	}
-}
-
-int PlayRecord::getOutsFromEvent() const
-{
-	return _event.getOutsMade();
-}
-
 void PlayRecord::debugPrintDatabasePlays() const
 {
 	//Only print 100 plays
-	_db->printPlayList(100);
+	_db->printPlayList(10);
 }
