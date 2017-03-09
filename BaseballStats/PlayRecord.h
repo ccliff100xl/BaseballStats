@@ -15,7 +15,7 @@ class PlayRecord : public Play
 	const GameLog* const _game;
 	const BaseballDatabase* const _db;
 
-	//State of game
+	//State of game at the END of the play before clearing bases etc. for end of a half inning
 	GameState _state;
 
 	//Results of this play
@@ -48,7 +48,7 @@ public:
 
 private:
 	//Functions to add information to the play
-	void addBatter(const std::vector<Player>& players_);
+	void addBatterToState(const std::vector<Player>& players_, GameState* state_) const;
 
 	//Function to parse what the result was for the play
 	//these could be members and just the values, but they are not

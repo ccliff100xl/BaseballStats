@@ -9,29 +9,28 @@ using namespace std;
 
 //Create from a pointer to a play object
 //baserunners_ holds runner on first, second, and third at start of play
-PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * const game_, const BaseballDatabase* const db_) : Play(*play_) , _state(*state_), _event(play_), _game(game_), _db(db_)
+PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * const game_, const BaseballDatabase* const db_) : Play(*play_) , _event(play_), _game(game_), _db(db_)
 {
-	//Add batter
-	addBatter(_db->getPlayers());
+	//Update batter in input state
+	addBatterToState(_db->getPlayers(), state_);
 
-	//Parse modified
+	//Parse modifiers
 	ParseModifiersToVector(getEventRaw(), _modifiers);
 
 	//Determine if it was a sacrifce
 	_sacrifice = parseSacrifice(getEventRaw());
 
-	//Update input state
-	state_->setBatter(getBatter());
-	state_->updateStateFromPlay(this);
+	//Save output to object state
+	_state = state_->updateStateFromPlay(this);
 }
 
-void PlayRecord::addBatter(const vector<Player>& players_)
+void PlayRecord::addBatterToState(const std::vector<Player>& players_, GameState* state_) const
 {
 	//Loop over players_ and find match
 	for (auto&& player : players_) {
 		if (boost::equal(getBatterID(), player.getID())) {
 			//These are equal, add the pointer
-			_state.setBatter(&player);
+			state_->setBatter(&player);
 			break;
 		}
 	}

@@ -1,5 +1,6 @@
 #pragma once
 #include "SportsStatsConstants.h"
+#include "Pitch.h"
 #include <vector>
 
 class Player;
@@ -19,8 +20,14 @@ class GameState
 
 	//TODO: Add defensive players
 
+	//This flag will be set to true when an at bat ends, so that _pitches can be reset
+	bool _batter_moved = false;
+
+	//Pitches
+	std::vector<Pitch> _pitches;
+
 	//Keep pointer to gamelog for basic information
-	const GameLog* _log;
+	const GameLog* _log = NULL;
 
 	//Outs
 	int _outs = 0;
@@ -37,11 +44,19 @@ public:
 	//Create based on log
 	GameState(const GameLog* log_);
 
+	//Needed for PlayRecord, which copies state after update
+	GameState() = default;
+	GameState& operator=(const GameState&) = default;
+	GameState(const GameState&) = default;
+
+	//Add pitches based on the pitches string from the log
+	void addPitches(const std::string pitches_string_);
+
 	//Method which does most of the work
-	void updateStateFromPlay(const PlayRecord* play_);
+	const GameState updateStateFromPlay(const PlayRecord* play_);
 
 	//Accessors
-	const Player* getBatter() const { return _offensive_players[0]; }
+	const Player* getBatter() const;
 
 	//Setters
 	void setBatter(const Player* batter_) { _offensive_players[0] = batter_; }

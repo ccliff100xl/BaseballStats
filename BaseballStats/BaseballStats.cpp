@@ -8,10 +8,10 @@
 #include "BaseballDatabase.h"
 
 //2014 World Series
-//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
+#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
 
 //2016 Oakland A's
-#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2016RS\\2016OAK.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2016RS\\2016OAK.EVA"
 
 //2016 Giants
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2016RS\\2016SFN.EVN"

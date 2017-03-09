@@ -160,6 +160,7 @@
     <ClInclude Include="GameState.h" />
     <ClInclude Include="InfoItem.h" />
     <ClInclude Include="ModifierInterpretation.h" />
+    <ClInclude Include="Pitch.h" />
     <ClInclude Include="Play.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayRecord.h" />
@@ -183,6 +184,7 @@
     <ClCompile Include="GameSet.cpp" />
     <ClCompile Include="GameState.cpp" />
     <ClCompile Include="ModifierInterpretation.cpp" />
+    <ClCompile Include="Pitch.cpp" />
     <ClCompile Include="Play.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayRecord.cpp" />

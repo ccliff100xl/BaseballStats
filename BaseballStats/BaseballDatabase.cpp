@@ -102,7 +102,6 @@ void BaseballDatabase::printPlayList(int n_plays_) const
 	}
 
 	//Print plays
-
 	for (int ip = n_plays_total - n_plays_; ip < n_plays_total; ip++) {
 		cout << _plays[ip] << endl;
 	}

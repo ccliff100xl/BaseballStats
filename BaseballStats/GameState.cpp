@@ -16,7 +16,9 @@ GameState::GameState(const GameLog* log_) : _log(log_) {
 	_offensive_players.push_back(NULL);
 }
 
-void GameState::updateStateFromPlay(const PlayRecord* play_)
+//This will return a GameState reference after all updates for the play are made
+//but before baserunners, etc. are updated due to the end of a half inning
+const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 {
 	//Make sure state of object matches play_
 	//Inning
@@ -35,8 +37,23 @@ void GameState::updateStateFromPlay(const PlayRecord* play_)
 		throw std::exception("GameState::updateStateFromPlay: Inning half missmatch (visitor/bottom)");
 	}
 
+	//Check if pitches needs to be reset
+	if (_batter_moved) {
+		_pitches.clear();
+	}
+
+	//Add pitches from string
+	addPitches(play_->getPitchesString());
+
 	//Update baserunners, this does everything
 	updateBaserunners(play_);
+
+	////////////////////End of update based on play/////////////////
+
+	//Save state for return
+	const GameState state_out(*this);
+
+	///////////////Beginning of update based on inning//////////////
 
 	//Check if there are more than three outs
 	if (_outs > 3) {
@@ -48,6 +65,7 @@ void GameState::updateStateFromPlay(const PlayRecord* play_)
 	if (_outs == 3) {
 		//This is the end of the half-inning, reset
 		_outs = 0;
+		_pitches.clear();
 		//Set all _offensive_players to NULL
 		_offensive_players[0] = NULL;
 		_offensive_players[1] = NULL;
@@ -57,7 +75,6 @@ void GameState::updateStateFromPlay(const PlayRecord* play_)
 			_inning_half = INNING_BOTTOM;
 		}
 		else {
-			_outs = 0;
 			_inning++;
 			_inning_half = INNING_TOP;
 		}
@@ -88,6 +105,26 @@ void GameState::updateStateFromPlay(const PlayRecord* play_)
 		std::cout << error_info << std::endl;
 		//Error out
 		throw std::exception("Consistency error found in GameState::updateStateFromPlay");
+	}
+
+	//Return state saved above
+	return state_out;
+}
+
+void GameState::addPitches(const std::string pitches_string_)
+{
+	//Loop over string and deal with each char
+	std::string info;
+	for (auto&& c : pitches_string_){
+		//Check if this is a non-pitch detail: +*.123>
+		if (c == '+' || c == '*' || c == '.' || c == '1' || c == '2' || c == '3' || c == '>') {
+			info.append(std::string(1,c));
+		}
+		else {
+			//Add pitch to vector and clear info
+			_pitches.push_back(Pitch(c, info));
+			info.clear();
+		}
 	}
 }
 
@@ -274,6 +311,8 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 		switch (m.getStartingBase()) {
 		case 0:
 			p_start = _offensive_players[0];
+			//Something is happening to the batter, set flag
+			_batter_moved = true;
 			break;
 		case 1:
 			p_start = br1;
@@ -331,6 +370,19 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 			}
 		}
 	}
+}
+
+const Player* GameState::getBatter() const 
+{
+	//Make sure _offensive_players is setup correctly
+	if (_offensive_players.size() == 4 && _offensive_players[0] != NULL) {
+		//OK, return batter
+		return _offensive_players[0];
+	}
+
+	//If it makes it here it's an error
+	throw std::exception("GameState::getBatter called for invalid _offensive_players vector");
+	return NULL;
 }
 
 //This will add a run scored based on who is hitting

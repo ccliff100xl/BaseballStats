@@ -46,6 +46,7 @@ public:
 	int getInning() const { return _inning; }
 	TeamType getTeam() const { return _team; }
 	std::string getBatterID() const { return _player_id; }
+	std::string getPitchesString() const { return _pitch_details; }
 	std::string getEventRaw() const { return _event_raw; }
 	std::string getLineRaw() const { return _line_raw; }
 
