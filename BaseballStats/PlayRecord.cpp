@@ -9,7 +9,12 @@ using namespace std;
 
 //Create from a pointer to a play object
 //baserunners_ holds runner on first, second, and third at start of play
-PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * const game_, const BaseballDatabase* const db_) : Play(*play_) , _event(play_), _game(game_), _db(db_)
+PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * const game_, const BaseballDatabase* const db_) : 
+	Play(*play_) , 
+	_event(play_), 
+	_game(game_), 
+	_db(db_), 
+	_state_start(*state_)
 {
 	//Update batter in input state
 	addBatterToState(_db->getPlayers(), state_);
@@ -98,10 +103,11 @@ ostream & operator<<(ostream & os, const PlayRecord & p)
 	//This prints the raw line, for debug
 	//os << " " << *(p.getBatter()) << " " << BattingResultString[p._batting_result] << " " << p.getLineRaw();
 	//Print starting state of play (will always give it's own newline)
-	os << std::endl << p._state;
+	os << std::endl << p._state_start;
 
 	//Print what the batter did
-	os << " " << *(p.getBatter()) << " " << BattingResultString[p.getBattingResult()];
+	os << " Batter: " << *(p.getBatter()) << std::endl;
+    os << " Result: " << BattingResultString[p.getBattingResult()];
 	//DEBUG print the raw line
 	os << std::endl << "   " << p.getLineRaw();
 

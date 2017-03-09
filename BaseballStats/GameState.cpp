@@ -407,14 +407,17 @@ void GameState::printGameInfo() const
 }
 
 //Print everything possible from this object
-//This isn't printing, _baserunner_1 must always be NULL
 std::ostream& operator<<(std::ostream & os_, const GameState & gs_)
 {
 	//Print inning
 	const std::string inning_string = (gs_._inning_half == INNING_TOP) ? "Top" : "Bottom";
 	os_ << inning_string << " of inning: " << gs_._inning;
 	//Print outs
-	os_ << " Outs: " << gs_._outs << std::endl;
+	os_ << " Outs: " << gs_._outs << " ";
+	//Print score
+	os_ << gs_._log->getVisitorTeamID() << " " << gs_._runs_visitor << " ";
+	os_ << gs_._log->getHomeTeamID() << " " << gs_._runs_home << std::endl;
+
 	//Print runners
 	if (gs_._offensive_players[1]) {
 		os_ << "  " << *(gs_._offensive_players[1]) << " on first base " << std::endl;

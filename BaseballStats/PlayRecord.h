@@ -15,6 +15,11 @@ class PlayRecord : public Play
 	const GameLog* const _game;
 	const BaseballDatabase* const _db;
 
+	//COPY of State at the start of the play
+	//This could be a pointer, if I was careful to make sure state passed in
+	//continues to exist
+	GameState _state_start;
+
 	//State of game at the END of the play before clearing bases etc. for end of a half inning
 	GameState _state;
 

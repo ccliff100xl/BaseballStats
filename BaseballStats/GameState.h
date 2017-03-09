@@ -42,12 +42,7 @@ class GameState
 
 public:
 	//Create based on log
-	GameState(const GameLog* log_);
-
-	//Needed for PlayRecord, which copies state after update
-	GameState() = default;
-	GameState& operator=(const GameState&) = default;
-	GameState(const GameState&) = default;
+	GameState(const GameLog* log_ = NULL);
 
 	//Add pitches based on the pitches string from the log
 	void addPitches(const std::string pitches_string_);
