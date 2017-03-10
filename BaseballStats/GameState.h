@@ -18,10 +18,14 @@ class GameState
 	// [3] runner on third
 	std::vector<const Player*> _offensive_players;
 
-	//TODO: Add defensive players
+	//Defensive Players, indexed by enum DefensivePosition
+	std::vector<const Player*> _defensive_players_away;
+	std::vector<const Player*> _defensive_players_home;
 
 	//This flag will be set to true when an at bat ends, so that _pitches can be reset
 	bool _batter_moved = false;
+	//This flag will be set when a half inning ends to control printing
+	bool _first_play_of_half_inning = true;
 
 	//Pitches
 	std::vector<Pitch> _pitches;
@@ -56,11 +60,11 @@ public:
 	//Setters
 	void setBatter(const Player* batter_) { _offensive_players[0] = batter_; }
 
-	//Print game informaion
-	void printGameInfo() const;
+	//Text output functions
+	void printScore( std::ostream& os_) const;
+	void printDefensivePlayers(std::ostream& os_) const;
 
-	//Define operators as friends 
-	friend std::ostream& operator<<(std::ostream & os_, const GameState & gs_);
+	friend std::ostream& operator<<(std::ostream& os_, const GameState & gs_);
 
 private:
 	//Methods called by updateStateFromPlay

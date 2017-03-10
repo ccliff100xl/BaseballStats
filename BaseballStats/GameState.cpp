@@ -8,12 +8,33 @@
 #include <iostream>
 #include <boost/algorithm/string.hpp>
 
+//This needs to handle log_ == NULL
 GameState::GameState(const GameLog* log_) : _log(log_) {
-	//Initialize vector to length 4, all NULL
-	_offensive_players.push_back(NULL);
-	_offensive_players.push_back(NULL);
-	_offensive_players.push_back(NULL);
-	_offensive_players.push_back(NULL);
+	//Initialize offensive vector to length 4, all NULL
+	for (int io = 0; io < 4; io++) {
+		_offensive_players.push_back(NULL);
+	}
+	//Initialize defensive vectors to necessary length, all NULL
+	for (int io = 0; io < DEFENSIVE_POSITION_COUNT; io++) {
+		_defensive_players_away.push_back(NULL);
+		_defensive_players_home.push_back(NULL);
+	}
+
+	//Add more information from log if it exists
+	if (log_) {
+		//Populate defensive players
+		for (auto&& p : log_->getStarters()) {
+			if (p.getTeam() == TEAM_VISITOR) {
+				_defensive_players_away[p.getDefensivePosition()] = &p;
+			}
+			else if (p.getTeam() == TEAM_HOME) {
+				_defensive_players_home[p.getDefensivePosition()] = &p;
+			}
+			else {
+				throw std::exception("GameState::GameState: Invalid Team");
+			}
+		}
+	}
 }
 
 //This will return a GameState reference after all updates for the play are made
@@ -55,6 +76,9 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 
 	///////////////Beginning of update based on inning//////////////
 
+	//This should always be set to false, unless it's the end of a half inning
+	_first_play_of_half_inning = false;
+
 	//Check if there are more than three outs
 	if (_outs > 3) {
 		std::cout << "GameState::updateStateFromPlay outs: " << _outs << std::endl;
@@ -66,6 +90,7 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 		//This is the end of the half-inning, reset
 		_outs = 0;
 		_pitches.clear();
+		_first_play_of_half_inning = true;
 		//Set all _offensive_players to NULL
 		_offensive_players[0] = NULL;
 		_offensive_players[1] = NULL;
@@ -399,11 +424,25 @@ void GameState::addRunScored()
 	}
 }
 
-//This will print the score, mostly for verification
-void GameState::printGameInfo() const 
+//This will print the score
+void GameState::printScore(std::ostream& os_) const
 {
-	std::cout << _log->getVisitorTeamID() <<" "<< _runs_visitor <<" ";
-	std::cout << _log->getHomeTeamID() << " " << _runs_home << std::endl;
+	os_ << _log->getVisitorTeamID() <<" "<< _runs_visitor <<" ";
+	os_ << _log->getHomeTeamID() << " " << _runs_home << std::endl;
+}
+
+//This will print the current defensive players
+void GameState::printDefensivePlayers(std::ostream& os_) const
+{
+	//Get correct array of players
+	const std::vector<const Player*>& players = 
+		(_inning_half == INNING_TOP) ? _defensive_players_home : _defensive_players_away;
+	//Print
+	for (int i = 0; i < DEFENSIVE_POSITION_COUNT; i++) {
+		if (players[i] == NULL) continue;
+		os_ << DefensivePositionString[static_cast<DefensivePosition>(i)] << ": ";
+		os_ << *(players[i]) << std::endl;
+	}
 }
 
 //Print everything possible from this object
@@ -417,6 +456,11 @@ std::ostream& operator<<(std::ostream & os_, const GameState & gs_)
 	//Print score
 	os_ << gs_._log->getVisitorTeamID() << " " << gs_._runs_visitor << " ";
 	os_ << gs_._log->getHomeTeamID() << " " << gs_._runs_home << std::endl;
+
+	//Print defensive players if this is the first play of an inning
+	if (gs_._first_play_of_half_inning) {
+		gs_.printDefensivePlayers(os_);
+	}
 
 	//Print runners
 	if (gs_._offensive_players[1]) {

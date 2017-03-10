@@ -172,3 +172,33 @@ static std::map< PlayModifier, const char * > PlayModifierString = {
 	{ PM_UREV,  "umpire review of call on the field" },
     { PM_HL,    "<hit location>" }
 };
+
+//Define enums for defensive positions
+enum DefensivePosition {
+	PITCHER = 0,
+	CATCHER,
+	FIRST_BASEMAN,
+	SECOND_BASEMAN,
+	THIRD_BASEMAN,
+	SHORT_STOP,
+	LEFT_FIELD,
+	CENTER_FIELD,
+	RIGHT_FIELD,
+	DESIGNATED_HITTER,
+	DEFENSIVE_POSITION_COUNT
+};
+
+//Define readable names for defensive positions
+static std::map< DefensivePosition, const char * > DefensivePositionString = {
+	{ PITCHER, "Pitcher" },
+	{ CATCHER, "Catcher" },
+	{ FIRST_BASEMAN, "First Baseman" },
+	{ SECOND_BASEMAN, "Second Baseman" },
+	{ THIRD_BASEMAN, "Third Baseman" },
+	{ SHORT_STOP, "Short Stop" },
+	{ LEFT_FIELD, "Left Field" },
+	{ CENTER_FIELD, "Center Field" },
+	{ RIGHT_FIELD, "Right Field" },
+	{ DESIGNATED_HITTER, "Designated Hitter" },
+	{ DEFENSIVE_POSITION_COUNT, "<COUNT ERROR>" },
+};

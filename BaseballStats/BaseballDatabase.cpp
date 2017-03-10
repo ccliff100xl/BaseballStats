@@ -2,6 +2,7 @@
 #include "GameSet.h"
 #include <algorithm>
 #include <iomanip>
+#include <iostream>
 
 using namespace std;
 
@@ -54,7 +55,7 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_) : _te
 			_plays.push_back(PlayRecord(&play, &state, &game, this));
 		}
 		//Print final game informtation from state
-		state.printGameInfo();
+		state.printScore(std::cout);
 	}
 }
 

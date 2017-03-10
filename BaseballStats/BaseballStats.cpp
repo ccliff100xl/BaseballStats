@@ -7,6 +7,14 @@
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
 
+//Goal: Parse all information available in the game logs
+//
+// To Do (in order):
+// 1. Track defensive players in game state - DONE
+// 2. Track substitutions
+// 3. Track hit locations from modifiers
+// 4. Track which defensive player makes plays/errors
+
 //2014 World Series
 #define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
 

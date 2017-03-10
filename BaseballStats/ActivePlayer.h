@@ -7,7 +7,7 @@ class ActivePlayer : public Player
 {
 	const TeamType _team;
 	const int _batting_position;
-	const int _field_position;
+	const int _field_position; //Standard Pitcher 1, Catcher 2...
 public:
 	//Constructor based on values
 	ActivePlayer(
@@ -25,5 +25,10 @@ public:
 		_team((TeamType) stoi(line_parsed[3])),
 		_batting_position(std::stoi(line_parsed[4])), 
 		_field_position(std::stoi(line_parsed[5])) { }
+
+	//Accessors
+	TeamType getTeam() const { return _team; }
+	//Convert _field_position to DefensivePosition enum
+	DefensivePosition getDefensivePosition() const { return static_cast<DefensivePosition>(_field_position - 1); }
 };
 
