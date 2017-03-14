@@ -11,7 +11,8 @@
 //
 // To Do (in order):
 // 1. Track defensive players in game state - DONE
-// 2. Track substitutions
+// 2. Track substitutions - Getting closer, but need to move defensive player location in array
+//                          Maybe just check activeplayer setting and get rid of ordered array?
 // 3. Track hit locations from modifiers
 // 4. Track which defensive player makes plays/errors
 

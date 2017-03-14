@@ -185,7 +185,8 @@ enum DefensivePosition {
 	CENTER_FIELD,
 	RIGHT_FIELD,
 	DESIGNATED_HITTER,
-	DEFENSIVE_POSITION_COUNT
+	PINCH_HITTER,
+	PINCH_RUNNER
 };
 
 //Define readable names for defensive positions
@@ -200,5 +201,6 @@ static std::map< DefensivePosition, const char * > DefensivePositionString = {
 	{ CENTER_FIELD, "Center Field" },
 	{ RIGHT_FIELD, "Right Field" },
 	{ DESIGNATED_HITTER, "Designated Hitter" },
-	{ DEFENSIVE_POSITION_COUNT, "<COUNT ERROR>" },
+	{ PINCH_HITTER, "Pinch Hitter" },
+	{ PINCH_RUNNER, "Pinch Runner" },
 };

@@ -22,12 +22,13 @@ public:
 	
 	//Constructor based on starter or sub line parsed
 	ActivePlayer(std::vector<std::string> line_parsed) : Player(line_parsed[1], line_parsed[2]),
-		_team((TeamType) stoi(line_parsed[3])),
+		_team((TeamType) std::stoi(line_parsed[3])),
 		_batting_position(std::stoi(line_parsed[4])), 
 		_field_position(std::stoi(line_parsed[5])) { }
 
 	//Accessors
 	TeamType getTeam() const { return _team; }
+	int getBattingPosition() const { return _batting_position; };
 	//Convert _field_position to DefensivePosition enum
 	DefensivePosition getDefensivePosition() const { return static_cast<DefensivePosition>(_field_position - 1); }
 };

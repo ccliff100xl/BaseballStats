@@ -14,8 +14,8 @@ GameState::GameState(const GameLog* log_) : _log(log_) {
 	for (int io = 0; io < 4; io++) {
 		_offensive_players.push_back(NULL);
 	}
-	//Initialize defensive vectors to necessary length, all NULL
-	for (int io = 0; io < DEFENSIVE_POSITION_COUNT; io++) {
+	//Initialize defensive vectors to length 10 to include DH
+	for (int io = 0; io < 10; io++) {
 		_defensive_players_away.push_back(NULL);
 		_defensive_players_home.push_back(NULL);
 	}
@@ -68,6 +68,30 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 
 	//Update baserunners, this does everything
 	updateBaserunners(play_);
+
+	//Add substitutions
+	for (auto&& p_new : play_->getSubs()) {
+		//Figure out where to look
+		std::vector<const ActivePlayer*>& players_ =
+			(p_new.getTeam() == TEAM_HOME) ? _defensive_players_home : _defensive_players_away;
+
+		//Loop over players_ and replace
+		bool found_player_to_replace = false;
+		for (int i_active = 0; i_active < players_.size(); i_active++) {
+			if (players_[i_active]->getBattingPosition() == p_new.getBattingPosition()) {
+				//Found player to replace
+				//THIS IS THE POINTER TO play_::subs, which seems not robust
+				players_[i_active] = &p_new;
+				found_player_to_replace = true;
+				break;
+			}
+		}
+		//Make sure if was found
+		if (!found_player_to_replace) {
+			std::cout << "New player: " << p_new << std::endl;
+			throw std::exception("GameState::updateStateFromPlay: could not find player to replace with sub");
+		}
+	}
 
 	////////////////////End of update based on play/////////////////
 
@@ -324,15 +348,15 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	sort(movements.begin(), movements.end(), baserunnerMovementCompare);
 
 	//Actually move the baserunners
-	const Player* br1 = _offensive_players[1];
-	const Player* br2 = _offensive_players[2];
-	const Player* br3 = _offensive_players[3];
+	const ActivePlayer* br1 = _offensive_players[1];
+	const ActivePlayer* br2 = _offensive_players[2];
+	const ActivePlayer* br3 = _offensive_players[3];
 
 	//Loop over movements, hopefully order of operations doesn't matter
 	for (auto&& m : movements) {
 
 		//Determine starting player, and clear base of starting player
-		const Player* p_start = NULL;
+		const ActivePlayer* p_start = NULL;
 		switch (m.getStartingBase()) {
 		case 0:
 			p_start = _offensive_players[0];
@@ -397,7 +421,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	}
 }
 
-const Player* GameState::getBatter() const 
+const ActivePlayer* GameState::getBatter() const 
 {
 	//Make sure _offensive_players is setup correctly
 	if (_offensive_players.size() == 4 && _offensive_players[0] != NULL) {
@@ -408,6 +432,26 @@ const Player* GameState::getBatter() const
 	//If it makes it here it's an error
 	throw std::exception("GameState::getBatter called for invalid _offensive_players vector");
 	return NULL;
+}
+
+void GameState::setBatter(const std::string player_id_)
+{ 
+	//Find players to search
+	const std::vector<const ActivePlayer*>& players_ = 
+		(_inning_half == INNING_TOP) ? _defensive_players_away : _defensive_players_home;
+
+	//Loop over players
+	for (auto&& p : players_) {
+		if (p->getID() == player_id_) {
+			//Found match, set and return
+			_offensive_players[0] = p;
+			return;
+		}
+	}
+	
+	//If it made it here, there was no match
+	std::cout << "Could not find " << player_id_ << std::endl;
+	throw std::exception("GameState::setBatter: could not find batter in active players");
 }
 
 //This will add a run scored based on who is hitting
@@ -435,10 +479,10 @@ void GameState::printScore(std::ostream& os_) const
 void GameState::printDefensivePlayers(std::ostream& os_) const
 {
 	//Get correct array of players
-	const std::vector<const Player*>& players = 
+	const std::vector<const ActivePlayer*>& players = 
 		(_inning_half == INNING_TOP) ? _defensive_players_home : _defensive_players_away;
 	//Print
-	for (int i = 0; i < DEFENSIVE_POSITION_COUNT; i++) {
+	for (int i = 0; i < 10; i++) {
 		if (players[i] == NULL) continue;
 		os_ << DefensivePositionString[static_cast<DefensivePosition>(i)] << ": ";
 		os_ << *(players[i]) << std::endl;

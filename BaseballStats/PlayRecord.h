@@ -52,9 +52,6 @@ public:
 	void debugPrintDatabasePlays() const;
 
 private:
-	//Functions to add information to the play
-	void addBatterToState(const std::vector<Player>& players_, GameState* state_) const;
-
 	//Function to parse what the result was for the play
 	//these could be members and just the values, but they are not
 	static void ParseModifiersToVector(std::string play_string_, std::vector<PlayModifier>& modifiers_);

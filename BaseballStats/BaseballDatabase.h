@@ -9,6 +9,9 @@ class GameSet;
 class BaseballDatabase
 {
 	const TeamSet _teams;
+
+	//When I created this, I had the idea that all pointers to players in the whole program would 
+	//point to _players here.  But, local ActivePlayers have taken over to handle substitutions.
 	std::vector<Player> _players;
 	bool _players_locked = false; //If this is true, cannot call addPlayer
 	std::vector<PlayRecord> _plays;

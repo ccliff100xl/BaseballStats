@@ -17,7 +17,7 @@ PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * con
 	_state_start(*state_)
 {
 	//Update batter in input state
-	addBatterToState(_db->getPlayers(), state_);
+	state_->setBatter(getBatterID());
 
 	//Parse modifiers
 	ParseModifiersToVector(getEventRaw(), _modifiers);
@@ -27,18 +27,6 @@ PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * con
 
 	//Save output to object state
 	_state = state_->updateStateFromPlay(this);
-}
-
-void PlayRecord::addBatterToState(const std::vector<Player>& players_, GameState* state_) const
-{
-	//Loop over players_ and find match
-	for (auto&& player : players_) {
-		if (boost::equal(getBatterID(), player.getID())) {
-			//These are equal, add the pointer
-			state_->setBatter(&player);
-			break;
-		}
-	}
 }
 
 bool PlayRecord::parseSacrifice(std::string play_string_)
@@ -107,9 +95,15 @@ ostream & operator<<(ostream & os, const PlayRecord & p)
 
 	//Print what the batter did
 	os << " Batter: " << *(p.getBatter()) << std::endl;
-    os << " Result: " << BattingResultString[p.getBattingResult()];
+    os << " Result: " << BattingResultString[p.getBattingResult()] << std::endl;
+
+	//Print any subs
+	for (auto sub : p.getSubs()) {
+		os << "  Sub: " << sub << " " << DefensivePositionString[sub.getDefensivePosition()] << std::endl;
+	}
+
 	//DEBUG print the raw line
-	os << std::endl << "   " << p.getLineRaw();
+	os << "   " << p.getLineRaw();
 
 	//Throw error if it's in an unknown result
 	EventResult br = p.getBattingResult();

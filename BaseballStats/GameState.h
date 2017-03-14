@@ -4,6 +4,7 @@
 #include <vector>
 
 class Player;
+class ActivePlayer;
 class Team;
 class PlayRecord;
 class GameLog;
@@ -16,11 +17,11 @@ class GameState
 	// [1] runner on first 
 	// [2] runner on second 
 	// [3] runner on third
-	std::vector<const Player*> _offensive_players;
+	std::vector<const ActivePlayer*> _offensive_players;
 
 	//Defensive Players, indexed by enum DefensivePosition
-	std::vector<const Player*> _defensive_players_away;
-	std::vector<const Player*> _defensive_players_home;
+	std::vector<const ActivePlayer*> _defensive_players_away;
+	std::vector<const ActivePlayer*> _defensive_players_home;
 
 	//This flag will be set to true when an at bat ends, so that _pitches can be reset
 	bool _batter_moved = false;
@@ -55,10 +56,10 @@ public:
 	const GameState updateStateFromPlay(const PlayRecord* play_);
 
 	//Accessors
-	const Player* getBatter() const;
+	const ActivePlayer* getBatter() const;
 
 	//Setters
-	void setBatter(const Player* batter_) { _offensive_players[0] = batter_; }
+	void setBatter(const std::string player_id_);
 
 	//Text output functions
 	void printScore( std::ostream& os_) const;
