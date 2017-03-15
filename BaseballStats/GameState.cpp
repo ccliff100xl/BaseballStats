@@ -41,6 +41,15 @@ GameState::GameState(const GameLog* log_) : _log(log_) {
 //but before baserunners, etc. are updated due to the end of a half inning
 const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 {
+	//Copy result from play to object
+	_result = play_->getEventResult();
+	
+	//Make sure this is an acceptable value
+	if (_result < GROUND_OUT || _result > NUMERIC_UNCERTAIN) {
+		//This is an error
+		throw std::exception("GameState::updateStateFromPlay: _result not recognized");
+	}
+
 	//Make sure state of object matches play_
 	//Inning
 	if (play_->getInning() != _inning) {
@@ -95,13 +104,44 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 
 	////////////////////End of update based on play/////////////////
 
+	//If this is not a no play, make sure the defensive players are valid
+	const std::vector<const ActivePlayer*>& current_defensive_players =
+		(_inning_half == INNING_TOP) ? _defensive_players_home : _defensive_players_away;
+	if (_result != NO_PLAY) {
+		//Loop over possible positions (not including DH)
+		for (int pos = PITCHER; pos != DESIGNATED_HITTER; pos++) {
+			//Loop over players
+			bool match_found = false;
+			for (auto&& p : current_defensive_players) {
+				//This may be NULL, if no DH
+				if (p == NULL) continue;
+				if (p->getDefensivePosition() == pos) {
+					//Found match
+					if (match_found) {
+						//Multiple, error
+						throw std::exception("Multiple players found for defensive position");
+					}
+					else {
+						match_found = true;
+					}
+				}
+			}
+			if (!match_found) {
+				//Missing, error
+				throw std::exception("No player found for defensive position");
+			}
+		}
+	}
+
 	//Save state for return
 	const GameState state_out(*this);
 
 	///////////////Beginning of update based on inning//////////////
 
 	//This should always be set to false, unless it's the end of a half inning
-	_first_play_of_half_inning = false;
+	//NO_PLAYS at the beginning of the inning are kind of an intermediate state, so leave
+	//this as is.  
+	if(_result != NO_PLAY) _first_play_of_half_inning = false;
 
 	//Check if there are more than three outs
 	if (_outs > 3) {
@@ -109,7 +149,7 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 		throw std::exception("GameState::updateStateFromPlay: too many outs");
 	}
 
-	//Check if there are three outs
+	//Check if there are three outs, 
 	if (_outs == 3) {
 		//This is the end of the half-inning, reset
 		_outs = 0;
@@ -481,10 +521,15 @@ void GameState::printDefensivePlayers(std::ostream& os_) const
 	//Get correct array of players
 	const std::vector<const ActivePlayer*>& players = 
 		(_inning_half == INNING_TOP) ? _defensive_players_home : _defensive_players_away;
-	//Print
-	for (int i = 0; i < 10; i++) {
+	//Print everything before DH
+	for (int i = PITCHER; i != DESIGNATED_HITTER; i++) {
 		if (players[i] == NULL) continue;
-		os_ << DefensivePositionString[static_cast<DefensivePosition>(i)] << ": ";
+		DefensivePosition dp = players[i]->getDefensivePosition();
+		//Don't allow pinch hitters or runners to print
+		if (dp == PINCH_HITTER || dp == PINCH_RUNNER) {
+			throw std::exception("GameState::printDefensivePlayers: called with pinch hitter or pinch runner");
+		}
+		os_ << DefensivePositionString[dp] << ": ";
 		os_ << *(players[i]) << std::endl;
 	}
 }
@@ -502,8 +547,9 @@ std::ostream& operator<<(std::ostream & os_, const GameState & gs_)
 	os_ << gs_._log->getHomeTeamID() << " " << gs_._runs_home << std::endl;
 
 	//Print defensive players if this is the first play of an inning
-	if (gs_._first_play_of_half_inning) {
+	if (gs_.isFirstPlayOfHalfInning()){
 		gs_.printDefensivePlayers(os_);
+		os_ << std::endl;
 	}
 
 	//Print runners

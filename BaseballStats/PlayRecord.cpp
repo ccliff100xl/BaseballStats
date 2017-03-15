@@ -91,8 +91,9 @@ ostream & operator<<(ostream & os, const PlayRecord & p)
 	//This prints the raw line, for debug
 	//os << " " << *(p.getBatter()) << " " << BattingResultString[p._batting_result] << " " << p.getLineRaw();
 	//Print starting state of play (will always give it's own newline)
-	os << std::endl << p._state_start;
-
+	if ( p.getBattingResult() != NO_PLAY) {
+		os << std::endl << p._state_start;
+	}
 	//Print what the batter did
 	os << " Batter: " << *(p.getBatter()) << std::endl;
     os << " Result: " << BattingResultString[p.getBattingResult()] << std::endl;

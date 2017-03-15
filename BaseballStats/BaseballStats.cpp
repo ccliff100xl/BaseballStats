@@ -11,13 +11,13 @@
 //
 // To Do (in order):
 // 1. Track defensive players in game state - DONE
-// 2. Track substitutions - Getting closer, but need to move defensive player location in array
-//                          Maybe just check activeplayer setting and get rid of ordered array?
+// 2. Track substitutions - DONE
 // 3. Track hit locations from modifiers
 // 4. Track which defensive player makes plays/errors
 
 //2014 World Series
 #define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS_Game1Trim.EVE"
 
 //2016 Oakland A's
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2016RS\\2016OAK.EVA"

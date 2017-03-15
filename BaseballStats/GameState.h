@@ -19,7 +19,7 @@ class GameState
 	// [3] runner on third
 	std::vector<const ActivePlayer*> _offensive_players;
 
-	//Defensive Players, indexed by enum DefensivePosition
+	//Defensive Players, order does not have meaning
 	std::vector<const ActivePlayer*> _defensive_players_away;
 	std::vector<const ActivePlayer*> _defensive_players_home;
 
@@ -27,6 +27,10 @@ class GameState
 	bool _batter_moved = false;
 	//This flag will be set when a half inning ends to control printing
 	bool _first_play_of_half_inning = true;
+
+	//This is needed to know if this is the first "real" play of the inning
+	//It would be nice to figure out a way to get rid of it
+	EventResult _result = NOT_PARSED;
 
 	//Pitches
 	std::vector<Pitch> _pitches;
@@ -71,5 +75,9 @@ private:
 	//Methods called by updateStateFromPlay
 	void updateBaserunners(const PlayRecord* play_);
 	void addRunScored();
+
+	//Use this to determine if this is the first "real" play of an inning
+	//It handles no plays
+	bool isFirstPlayOfHalfInning() const { return _first_play_of_half_inning && _result != NO_PLAY; }
 };
 
