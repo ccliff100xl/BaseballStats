@@ -87,6 +87,7 @@ const std::vector<ModifierInterpretation> ModifierInterpretation::Interpretation
 	ModifierInterpretation("OBS",PM_OBS), //obstruction(fielder obstructing a runner)
 	ModifierInterpretation("P",PM_P), //pop fly
 	ModifierInterpretation("PASS",PM_PASS), //a runner passed another runner and was called out
+	ModifierInterpretation("R",PM_R), //relay throw
 	ModifierInterpretation("RINT",PM_RINT), //runner interference
 	ModifierInterpretation("SF",PM_SF), //sacrifice fly
 	ModifierInterpretation("SH",PM_SH), //sacrifice hit(bunt)

@@ -90,13 +90,30 @@ ostream & operator<<(ostream & os, const PlayRecord & p)
 {
 	//This prints the raw line, for debug
 	//os << " " << *(p.getBatter()) << " " << BattingResultString[p._batting_result] << " " << p.getLineRaw();
+
+	//Start with newline to give space from previous info
+	os << std::endl;
+
 	//Print starting state of play (will always give it's own newline)
+	//Skip for NO_PLAY to let subs happen
 	if ( p.getBattingResult() != NO_PLAY) {
-		os << std::endl << p._state_start;
+		os << p._state_start;
 	}
+	
 	//Print what the batter did
 	os << " Batter: " << *(p.getBatter()) << std::endl;
     os << " Result: " << BattingResultString[p.getBattingResult()] << std::endl;
+
+	//Print modifiers
+	if (p._modifiers.size() > 0) {
+		os << " Details: ";;
+		for (auto m : p._modifiers) {
+			os << PlayModifierString[m] << ", ";
+		}
+		//Overwrite final comma
+		cout << '\b' << '\b' << " ";
+		os << std::endl;
+	}
 
 	//Print any subs
 	for (auto sub : p.getSubs()) {

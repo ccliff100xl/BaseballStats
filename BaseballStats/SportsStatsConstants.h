@@ -114,6 +114,7 @@ enum PlayModifier {
 	PM_OBS,   //obstruction(fielder obstructing a runner)
 	PM_P,     //pop fly
 	PM_PASS,  //a runner passed another runner and was called out
+	PM_R,  //relay throw from the initial fielder
 	//R$,  //relay throw from the initial fielder to $ with no out made
 	PM_RINT,  //runner interference
 	PM_SF,    //sacrifice fly
@@ -163,6 +164,7 @@ static std::map< PlayModifier, const char * > PlayModifierString = {
 	{ PM_OBS,   "obstruction(fielder obstructing a runner)" },
 	{ PM_P,     "pop fly" },
 	{ PM_PASS,  "a runner passed another runner and was called out" },
+	{ PM_R,     "relay throw" },
 	{ PM_RINT,  "runner interference" },
 	{ PM_SF,    "sacrifice fly" },
 	{ PM_SH,    "sacrifice hit(bunt)" },
