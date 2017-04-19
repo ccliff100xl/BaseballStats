@@ -11,19 +11,23 @@ class Play;
 class Event
 {
 	EventResult _batting_result = NOT_PARSED;
-	//int _outs_made = 0;
-	//int _runs_scored = 0;
+	DefensivePosition _hit_location = UNKNOWN_DEFENSIVE_POSITION;
 	std::vector<BaserunnerMovement> _baserunner_movements;
 
 public:
 	//Accessors
 	EventResult getBattingResult() const { return _batting_result; }
-	//int getOutsMade() const { return _outs_made;  }
-	//int getRunsScored() const { return _runs_scored; }
 	std::vector<BaserunnerMovement> getBaserunnerMovements() const { return _baserunner_movements; }
+	DefensivePosition getHitLocation() const { return _hit_location; };
+
+	//Needed to copy location which may be in modifier
+	void setHitLocation( const DefensivePosition hit_location_);
 
 	//Construct from Play object
 	Event(const Play* play_, const std::string* event_string_ = NULL);
+
+	//Helper
+	static DefensivePosition convertPositionIntCharToDefensivePosition(const char fielder_);
 private:
 	static EventResult parseBattingResult(const std::string event_string_);
 };

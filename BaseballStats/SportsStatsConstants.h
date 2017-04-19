@@ -177,6 +177,7 @@ static std::map< PlayModifier, const char * > PlayModifierString = {
 
 //Define enums for defensive positions
 enum DefensivePosition {
+	UNKNOWN_DEFENSIVE_POSITION = -1,
 	PITCHER = 0,
 	CATCHER,
 	FIRST_BASEMAN,
@@ -193,6 +194,7 @@ enum DefensivePosition {
 
 //Define readable names for defensive positions
 static std::map< DefensivePosition, const char * > DefensivePositionString = {
+	{ UNKNOWN_DEFENSIVE_POSITION, "<unknown>" },
 	{ PITCHER, "Pitcher" },
 	{ CATCHER, "Catcher" },
 	{ FIRST_BASEMAN, "First Baseman" },

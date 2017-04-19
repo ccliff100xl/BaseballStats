@@ -14,7 +14,7 @@ public:
 		std::string id_,
 		std::string name_,
 		int team_, 
-		int batting_position_, 
+		int batting_position_, //1-9, pitcher in DH game is 0
 		int field_position_) : Player(id_, name_), 
 		_team((TeamType) team_) ,
 		_batting_position(batting_position_) ,

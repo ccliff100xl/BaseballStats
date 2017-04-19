@@ -52,7 +52,14 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_) : _te
 		// This temporary object will be used to track the state of the game
 		GameState state(&game);
 		for (auto&& play : game.getPlays()) {
-			_plays.push_back(PlayRecord(&play, &state, &game, this));
+			try {
+				_plays.push_back(PlayRecord(&play, &state, &game, this));
+			}
+			catch (std::exception& e) {
+				//Print some information, then throw the same exception
+				std::cout << "Error on Play: " << play.getLineRaw() << std::endl;
+				throw(e);
+			}
 		}
 		//Print final game informtation from state
 		state.printScore(std::cout);

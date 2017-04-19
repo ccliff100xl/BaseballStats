@@ -20,7 +20,11 @@ PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * con
 	state_->setBatter(getBatterID());
 
 	//Parse modifiers
-	ParseModifiersToVector(getEventRaw(), _modifiers);
+	const DefensivePosition hit_location =  ParseModifiersToVector(getEventRaw(), _modifiers);
+	//If hit_location_ is valid, use it to set value in _event
+	if (hit_location != UNKNOWN_DEFENSIVE_POSITION) {
+		_event.setHitLocation(hit_location);
+	}
 
 	//Determine if it was a sacrifce
 	_sacrifice = parseSacrifice(getEventRaw());
@@ -51,8 +55,12 @@ bool PlayRecord::parseSacrifice(std::string play_string_)
 	}
 }
 
-void PlayRecord::ParseModifiersToVector(std::string play_string_, std::vector<PlayModifier>& modifiers_)
+//The hit location is returned as an DefensivePosition if one of the modifiers is hit location
+DefensivePosition PlayRecord::ParseModifiersToVector(std::string play_string_, std::vector<PlayModifier>& modifiers_)
 {
+	//This will be updated if an appropriate modifier is parsed
+	DefensivePosition hit_location = UNKNOWN_DEFENSIVE_POSITION;
+	
 	//Parse up to ".", which is the end of the modifiers
 	vector<string> line_parsed_period;
 	boost::split(line_parsed_period, play_string_, boost::is_any_of("."));
@@ -62,7 +70,7 @@ void PlayRecord::ParseModifiersToVector(std::string play_string_, std::vector<Pl
 	boost::split(line_parsed, line_parsed_period[0], boost::is_any_of("/"));
 
 	//If length is less than 2, nothing to do
-	if (line_parsed.size() < 2) return;
+	if (line_parsed.size() < 2) return hit_location;
 
 	//Length > 2 means there are modifiers to parse
 	//Loop over inputs and possible matches
@@ -70,10 +78,23 @@ void PlayRecord::ParseModifiersToVector(std::string play_string_, std::vector<Pl
 	{
 		bool match_found = false;
 		const string modifier_string_in = line_parsed[i_s];
+		//There appear to be trailing / with no modifier following it.
+		//This means modifier_string_in has no length, in which case just skip it
+		if (modifier_string_in.length() == 0) continue;
 		for (auto&& m : ModifierInterpretation::InterpretationArray) {
 			if (m == modifier_string_in) {
 				modifiers_.push_back(m.getModifier());
 				match_found = true;
+
+				//Check if this is a hit location
+				if (m.getModifier() == PM_HL) {
+					//Make sure this has not already been set
+					if (hit_location != UNKNOWN_DEFENSIVE_POSITION) {
+						throw exception("PlayRecord::ParseModifiersToVector: Hit location set twice by modifiers");
+					}
+					//Set hit_location based on modifier_string_in
+					hit_location = Event::convertPositionIntCharToDefensivePosition(modifier_string_in[0]);
+				}
 				break;
 			}
 		}
@@ -84,6 +105,8 @@ void PlayRecord::ParseModifiersToVector(std::string play_string_, std::vector<Pl
 			throw exception("Modifier not recognized");
 		}
 	}
+	//Return the hit location
+	return hit_location;
 }
 
 ostream & operator<<(ostream & os, const PlayRecord & p)
@@ -102,7 +125,12 @@ ostream & operator<<(ostream & os, const PlayRecord & p)
 	
 	//Print what the batter did
 	os << " Batter: " << *(p.getBatter()) << std::endl;
-    os << " Result: " << BattingResultString[p.getBattingResult()] << std::endl;
+	os << " Result: " << BattingResultString[p.getBattingResult()];
+	//Print hit location if set
+	if (p.getHitLocation() != UNKNOWN_DEFENSIVE_POSITION) {
+		os << " ( " << DefensivePositionString[p.getHitLocation()] << " )" ;
+	}
+	os << std::endl;
 
 	//Print modifiers
 	if (p._modifiers.size() > 0) {

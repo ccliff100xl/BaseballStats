@@ -43,7 +43,7 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 {
 	//Copy result from play to object
 	_result = play_->getEventResult();
-	
+
 	//Make sure this is an acceptable value
 	if (_result < GROUND_OUT || _result > NUMERIC_UNCERTAIN) {
 		//This is an error
@@ -87,14 +87,17 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 		//Loop over players_ and replace
 		bool found_player_to_replace = false;
 		for (int i_active = 0; i_active < players_.size(); i_active++) {
+			//Skip NULL (probably and error, but will be caught later)
+			if (players_[i_active] == NULL) continue;
+			//Check if batting  position matches (if a match has not been found)
 			if (players_[i_active]->getBattingPosition() == p_new.getBattingPosition()) {
 				//Found player to replace
-				//THIS IS THE POINTER TO play_::subs, which seems not robust
-				players_[i_active] = &p_new;
+				players_[i_active] = &p_new; //THIS IS THE POINTER TO play_::subs, which seems not robust
 				found_player_to_replace = true;
 				break;
 			}
 		}
+
 		//Make sure if was found
 		if (!found_player_to_replace) {
 			std::cout << "New player: " << p_new << std::endl;
@@ -102,6 +105,46 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 		}
 	}
 
+	//Handle a very specific case: If the new sub was the DH, then the team loses their DH.
+	//This will manifest itself by having two pitchers, in this case the one which has batting 
+	//position 0 should be removed
+	//Only update if no play
+	if (_result != NO_PLAY) {
+		//Check current defensive players
+	    std::vector<const ActivePlayer*>& defensive_players =
+			(_inning_half == INNING_TOP) ? _defensive_players_home : _defensive_players_away;
+		//Loop over once, and count pitchers
+		int n_pitchers = 0;
+		for (auto&& p : defensive_players) {
+			//Skip if NULL
+			if (p == NULL) continue;
+			if (p->getDefensivePosition() == PITCHER) n_pitchers++;
+		}
+		//If there are two pitchers, remove one
+		int i_pitcher_delete = -1;
+		if (n_pitchers == 2) {
+			//Loop over again, this time delete the one with batting position 0
+			for (int i_player = 0; i_player < defensive_players.size(); i_player++) {
+				const ActivePlayer* p = defensive_players[i_player];
+				if (p->getDefensivePosition() == PITCHER && p->getBattingPosition() == 0) {
+					//Make sure i_pitcher_delete is not already set
+					if (i_pitcher_delete >= 0) {
+						//This is an error
+						throw std::exception("Multiple pitchers to delete found");
+					}
+					//Save index to delete
+					i_pitcher_delete = i_player;
+				}
+			}
+			//See if a player to delete was found
+			if (i_pitcher_delete < 0) {
+				//This is an error
+				throw std::exception("No pitcher to delete found");
+			}
+			//Delete pitcher
+			defensive_players.erase(defensive_players.begin() + i_pitcher_delete);
+		}
+	}
 	////////////////////End of update based on play/////////////////
 
 	//If this is not a no play, make sure the defensive players are valid
@@ -141,7 +184,7 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 	//This should always be set to false, unless it's the end of a half inning
 	//NO_PLAYS at the beginning of the inning are kind of an intermediate state, so leave
 	//this as is.  
-	if(_result != NO_PLAY) _first_play_of_half_inning = false;
+	if (_result != NO_PLAY) _first_play_of_half_inning = false;
 
 	//Check if there are more than three outs
 	if (_outs > 3) {
@@ -171,7 +214,7 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 
 	//////////////////////////////
 	//Do sanity checks to find errors in design
-	
+
 	//Common string to add errors to
 	std::string error_info;
 
@@ -179,13 +222,13 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 	for (int i_p1 = 1; i_p1 < _offensive_players.size(); i_p1++) {
 		//If i_p1 is NULL, continue
 		if (_offensive_players[i_p1] == NULL) continue;
-		for (int i_p2 = i_p1+1; i_p2 < _offensive_players.size(); i_p2++) {
+		for (int i_p2 = i_p1 + 1; i_p2 < _offensive_players.size(); i_p2++) {
 			if (_offensive_players[i_p1] == _offensive_players[i_p2]) {
 				error_info.append("Baserunner on multiple bases");
 			}
 		}
 	}
-	
+
 	//Was an error found
 	if (error_info.length() > 0) {
 		//Print plays
@@ -204,10 +247,10 @@ void GameState::addPitches(const std::string pitches_string_)
 {
 	//Loop over string and deal with each char
 	std::string info;
-	for (auto&& c : pitches_string_){
+	for (auto&& c : pitches_string_) {
 		//Check if this is a non-pitch detail: +*.123>
 		if (c == '+' || c == '*' || c == '.' || c == '1' || c == '2' || c == '3' || c == '>') {
-			info.append(std::string(1,c));
+			info.append(std::string(1, c));
 		}
 		else {
 			//Add pitch to vector and clear info
@@ -283,7 +326,8 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 			if (m_str[1] == 'X') {
 				//This is an out, increment and continue loop
 				made_out = true;
-			} else if (m_str[1] != '-') {
+			}
+			else if (m_str[1] != '-') {
 				std::cout << "GameState::updateBaserunners: " << m_str[1] << std::endl;
 				throw std::exception("GameState::updateBaserunners movement invalid middle char");
 			}
@@ -313,7 +357,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 			line_parsed_details.erase(line_parsed_details.begin());
 			bool is_error = false;
 			//Loop over all details
-			for(auto&& details : line_parsed_details){
+			for (auto&& details : line_parsed_details) {
 				//Check if ANY char in the detail is an error
 				for (auto&& c : details) {
 					if (c == 'E') {
@@ -330,7 +374,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	//Loop over movements, make sure none of them have the same starting base
 	//unless it's the batter and there is an error
 	for (int i_m1 = 0; i_m1 < movements.size(); i_m1++) {
-		for (int i_m2 = i_m1+1; i_m2 < movements.size(); i_m2++) {
+		for (int i_m2 = i_m1 + 1; i_m2 < movements.size(); i_m2++) {
 			if (movements[i_m1].getStartingBase() == movements[i_m2].getStartingBase()) {
 
 				////Not True: Non-batters can only advance on errors
@@ -347,7 +391,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 				//Delete the movement with the lower ending base
 				if (movements[i_m1].getEndingBase() < movements[i_m2].getEndingBase()) {
 					//Delete i_m1
-					movements.erase(movements.begin()+ i_m1);
+					movements.erase(movements.begin() + i_m1);
 					//Decrease i_m1 so cell is not skipped
 					--i_m1;
 				}
@@ -461,7 +505,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	}
 }
 
-const ActivePlayer* GameState::getBatter() const 
+const ActivePlayer* GameState::getBatter() const
 {
 	//Make sure _offensive_players is setup correctly
 	if (_offensive_players.size() == 4 && _offensive_players[0] != NULL) {
@@ -475,9 +519,9 @@ const ActivePlayer* GameState::getBatter() const
 }
 
 void GameState::setBatter(const std::string player_id_)
-{ 
+{
 	//Find players to search
-	const std::vector<const ActivePlayer*>& players_ = 
+	const std::vector<const ActivePlayer*>& players_ =
 		(_inning_half == INNING_TOP) ? _defensive_players_away : _defensive_players_home;
 
 	//Loop over players
@@ -488,7 +532,7 @@ void GameState::setBatter(const std::string player_id_)
 			return;
 		}
 	}
-	
+
 	//If it made it here, there was no match
 	std::cout << "Could not find " << player_id_ << std::endl;
 	throw std::exception("GameState::setBatter: could not find batter in active players");
@@ -511,7 +555,7 @@ void GameState::addRunScored()
 //This will print the score
 void GameState::printScore(std::ostream& os_) const
 {
-	os_ << _log->getVisitorTeamID() <<" "<< _runs_visitor <<" ";
+	os_ << _log->getVisitorTeamID() << " " << _runs_visitor << " ";
 	os_ << _log->getHomeTeamID() << " " << _runs_home << std::endl;
 }
 
@@ -519,7 +563,7 @@ void GameState::printScore(std::ostream& os_) const
 void GameState::printDefensivePlayers(std::ostream& os_) const
 {
 	//Get correct array of players
-	const std::vector<const ActivePlayer*>& players = 
+	const std::vector<const ActivePlayer*>& players =
 		(_inning_half == INNING_TOP) ? _defensive_players_home : _defensive_players_away;
 	//Print everything before DH
 	for (int i = PITCHER; i != DESIGNATED_HITTER; i++) {
@@ -547,7 +591,7 @@ std::ostream& operator<<(std::ostream & os_, const GameState & gs_)
 	os_ << gs_._log->getHomeTeamID() << " " << gs_._runs_home << std::endl;
 
 	//Print defensive players if this is the first play of an inning
-	if (gs_.isFirstPlayOfHalfInning()){
+	if (gs_.isFirstPlayOfHalfInning()) {
 		gs_.printDefensivePlayers(os_);
 		os_ << std::endl;
 	}

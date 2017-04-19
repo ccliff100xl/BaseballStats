@@ -37,6 +37,7 @@ public:
 
 	//Get result of event
 	EventResult getEventResult() const { return _event.getBattingResult(); }
+	DefensivePosition getHitLocation() const { return _event.getHitLocation(); };
 
 	//These functions are a little funny, they are counts but will only return 1 or 0
 	int getNumberAtBats() const;
@@ -54,7 +55,7 @@ public:
 private:
 	//Function to parse what the result was for the play
 	//these could be members and just the values, but they are not
-	static void ParseModifiersToVector(std::string play_string_, std::vector<PlayModifier>& modifiers_);
+	static DefensivePosition ParseModifiersToVector(std::string play_string_, std::vector<PlayModifier>& modifiers_);
 	static bool parseSacrifice(std::string play_string_);
 
 	//For printing

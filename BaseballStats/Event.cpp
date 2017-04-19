@@ -58,10 +58,13 @@ Event::Event(const Play* play_, const string* event_string_)
 				_batting_result = FLY_OUT;
 				//Since he flew out, he got out at home
 				_baserunner_movements.push_back(BaserunnerMovement(0, 0, true));
+				//Add hit location
+				_hit_location = convertPositionIntCharToDefensivePosition(event_parsed[0][0]);
 			}
 			else {
 				//Multiple numbers is a ground ball
 				_batting_result = GROUND_OUT;
+				_hit_location = convertPositionIntCharToDefensivePosition(event_parsed[0][0]);
 				//But, there could be an error, search for E
 				if (event_parsed[0].find_first_of('E') != string::npos) {
 					//There was an error, hitter goes to first with no out
@@ -78,6 +81,7 @@ Event::Event(const Play* play_, const string* event_string_)
 			// If the putout is made at a base not normally covered by the fielder the base runner, 
 			// batter in this example, is given explicitly.
 			_batting_result = GROUND_OUT;
+			_hit_location = convertPositionIntCharToDefensivePosition(event_parsed[0][0]);
 			//Figure out who got out
 			if (event_parsed[1].size() != 1) {
 				//Must be a single char for 1-3 or H
@@ -201,15 +205,22 @@ Event::Event(const Play* play_, const string* event_string_)
 	case SINGLE:
 		//Add movement from batter to 1
 		_baserunner_movements.push_back(BaserunnerMovement(0, 1));
+		if (event_string.size() > 1) _hit_location = convertPositionIntCharToDefensivePosition(event_string[1]);
 		break;
 	case DOUBLE:
+		//Add movement from batter to 2
+		_baserunner_movements.push_back(BaserunnerMovement(0, 2));
+		if (event_string.size() > 1) _hit_location = convertPositionIntCharToDefensivePosition(event_string[1]);
+		break;
 	case GROUND_RULE_DOUBLE:
 		//Add movement from batter to 2
 		_baserunner_movements.push_back(BaserunnerMovement(0, 2));
+		//Don't parse location for ground rule double
 		break;
 	case TRIPLE:
 		//Add movement from batter to 3
 		_baserunner_movements.push_back(BaserunnerMovement(0, 3));
+		if (event_string.size() > 1) _hit_location = convertPositionIntCharToDefensivePosition(event_string[1]);
 		break;
 	case HR:
 		//Add movement from batter to home
@@ -245,6 +256,15 @@ Event::Event(const Play* play_, const string* event_string_)
 	}
 }
 
+void Event::setHitLocation(const DefensivePosition hit_location_)
+{
+	if (_hit_location != UNKNOWN_DEFENSIVE_POSITION) {
+		//Cannot set it twice
+		throw std::exception("Event::setHitLocation: _hit_location already set");
+	}
+	_hit_location = hit_location_;
+}
+
 EventResult Event::parseBattingResult(const std::string event_string_)
 {
 	for (auto&& e : EventInterpretation::InterpretationArray) {
@@ -253,4 +273,15 @@ EventResult Event::parseBattingResult(const std::string event_string_)
 	std::cout << event_string_ << " not recognized" << std::endl;
 	throw std::exception("Event::parseBattingResult: Play not recognized");
 	return EventResult::NOT_RECOGNIZED;
+}
+
+DefensivePosition Event::convertPositionIntCharToDefensivePosition(const char fielder_)
+{
+	const int fielder = fielder_ - '0';
+	//String coverted to number OK
+	if (fielder < 1 || fielder > 9) {
+		std::cout << "fielder_: " << fielder_ << std::endl;
+		throw std::exception("Event::convertPositionIntCharToDefensivePosition: fielder_ out of range");
+	}
+	return static_cast<DefensivePosition>(fielder - 1);
 }

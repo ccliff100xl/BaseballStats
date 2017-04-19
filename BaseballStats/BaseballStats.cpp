@@ -12,8 +12,20 @@
 // To Do (in order):
 // 1. Track defensive players in game state - DONE
 // 2. Track substitutions - DONE
-// 3. Track hit locations from modifiers
+// 3. Track hit locations - DONE
+//         a. from hits
+//         b. from modifiers - I only see them for homeruns
 // 4. Track which defensive player makes plays/errors
+
+//
+// Complicated Issues Encountered
+//
+//1. DH moves to field, so pitcher needs to be deleted from batting position 0
+//   Case in the top of the 8th here: http://www.baseball-reference.com/boxes/OAK/OAK201604070.shtml
+//
+//2. Trailing / with no modifier following in play.  This is an error in the log, but I deal with it
+//   See play,4,1,beltb001,11,SBX,7/F/ in 2016 Giants
+//
 
 //2014 World Series
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
@@ -27,6 +39,9 @@
 
 //Common to all 
 #define TEAM_LIST_FILE  "TeamList.txt"
+
+//Flag to control how much is printed
+//#define BUILD_DB_ONLY =1
 
 using namespace std;
 
@@ -44,6 +59,11 @@ int main()
 
 		//Create database
 		BaseballDatabase db(&ts, &gs);
+
+		//Check for early exit
+#ifdef BUILD_DB_ONLY
+		return 0;
+#endif
 
 		//Run everyting (sort of a systest)
 		//Print Players
