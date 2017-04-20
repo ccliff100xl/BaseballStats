@@ -16,6 +16,7 @@
 //         a. from hits
 //         b. from modifiers - I only see them for homeruns
 // 4. Track which defensive player makes plays/errors
+// 5. Handle "badj" lines, these come before the bitter and say he batted from an unexpected side
 
 //
 // Complicated Issues Encountered
@@ -28,20 +29,18 @@
 //
 
 //2014 World Series
-//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
-#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS_Game1Trim.EVE"
+//#define GAME_LOG_FILE_2014_WS "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
 
-//2016 Oakland A's
-//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2016RS\\2016OAK.EVA"
-
-//2016 Giants
-//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2016RS\\2016SFN.EVN"
+//Path to files
+#define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
+//List of files in GAME_LOG_DIR
+#define LOG_FILE_LIST "event_log_file_list.txt"
 
 //Common to all 
 #define TEAM_LIST_FILE  "TeamList.txt"
 
 //Flag to control how much is printed
-//#define BUILD_DB_ONLY =1
+#define BUILD_DB_ONLY =1
 
 using namespace std;
 
@@ -54,8 +53,29 @@ int main()
 		//Print team list
 		ts.printTeamList();
 
-		//Create a game set object
-		GameSet gs(GAME_LOG_FILE, &ts);
+		////Create log file list for testing
+		//StringVector log_files;
+		//log_files.push_back(GAME_LOG_FILE_2014_WS);
+
+		//Create path to log file containing many seasons
+		string list_file_path(GAME_LOG_DIR);
+		list_file_path.append("\\");
+		list_file_path.append(LOG_FILE_LIST);
+
+		std::cout << "Loading log file list from: " << list_file_path << std::endl;
+		FileBasedObject file_list(list_file_path);
+
+		//Loop over each line in the list and add it to the vector of files to be parsed
+		StringVector log_files;
+		for (auto&& filename : file_list.getLines()) {
+			std::string path_full(GAME_LOG_DIR);
+			path_full.append("\\");
+			path_full.append(filename);
+			log_files.push_back(path_full);
+		}
+
+		//Create game set
+		GameSet gs(log_files, &ts);
 
 		//Create database
 		BaseballDatabase db(&ts, &gs);

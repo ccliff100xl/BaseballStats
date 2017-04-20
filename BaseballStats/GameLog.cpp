@@ -64,6 +64,14 @@ bool GameLog::parseLogLine(const string line_)
 			_plays.back().addSub(ActivePlayer(line_parsed));
 		}
 	}
+	//If "badj" ignore, this is a batting adjustment
+	else if (boost::equal(line_id, string("badj"))) {
+		//TODO: store batting adjustment information
+	}
+	//If "ladj" ignore, this is when batters hit out of order
+	else if (boost::equal(line_id, string("ladj"))) {
+		//TODO: do something with this...
+	}
 	else {
 		//This is an error
 		cout << "Line ID: " << line_id << " not recognized" << endl;
