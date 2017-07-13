@@ -7,8 +7,7 @@
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
 
-//CURRENT STATUS: Trying to parse all lines, mostly finding errors in logs.
-//                Can get as far as 1991ATL.EVN
+//CURRENT STATUS: Can parse all regular season games, now need to process plays
 
 //Goal: Parse all information available in the game logs
 //
