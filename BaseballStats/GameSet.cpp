@@ -27,8 +27,8 @@ GameSet::GameSet(const StringVector logs_file_paths_, TeamSet* team_set_) : _tea
 		bool parsing_game = false; //True if parsing a game, false if about to parse a new game
 		while (getline(game_log_file, line))
 		{
-			//Print line
-			//cout << line << '\n';
+			//DEBUG !! Print line !! DEBUG
+			//std::cout << line << std::endl;
 
 			//If parsing game, just pass line
 			if (parsing_game) {
@@ -39,23 +39,49 @@ GameSet::GameSet(const StringVector logs_file_paths_, TeamSet* team_set_) : _tea
 			//If not parsing game, start a new game
 			if (!parsing_game) {
 				//Parse line
-				vector<string> line_parsed;
-				boost::split(line_parsed, line, boost::is_any_of(","));
-				//This must be id,<gameid_string>
-				if (!boost::equal(line_parsed[0], string("id"))) {
-					//This is an error
-					throw exception("First line of game log must be 'id'");
+				StringVector line1_parsed = SplitStringToVector(line, ",");
+				//Loop over comments, before id,<gameid_string>
+				while (line1_parsed[0] != "id") {
+					//Allow a comment
+					if (line1_parsed[0] == "com") {
+						//Print as info
+						std::cout << "Comment at beginning of line: " << line1_parsed[1] << std::endl;
+					}
+					else {
+						//This is an error
+						throw exception("First line of game log must be 'id'");
+					}
+					//Get the next line
+					getline(game_log_file, line);
+					line1_parsed = SplitStringToVector(line, ",");
 				}
 				//First line is id, save it
-				string game_id = line_parsed[1];
+				string game_id = line1_parsed[1];
 
-				//Get second line, which is version
-				getline(game_log_file, line);
-				boost::split(line_parsed, line, boost::is_any_of(","));
-				int game_version = stoi(line_parsed[1]);
+				//Version is sometimes missing and can always be ignored
+				//So, don't try to parse
+				////Get second line, which should be version version
+				//getline(game_log_file, line);
+				//StringVector line2_parsed = SplitStringToVector(line, ",");
+				//if (line2_parsed[0] != "version") {
+				//	//Sometimes version is missing, in this case just break and start parsing
+
+				//	////This may be an info line, print it and continue
+				//	//std::cout << "Ignoring out of place: " << line << std::endl;
+				//	////Get next line
+				//	//getline(game_log_file, line);
+				//	//line2_parsed = SplitStringToVector(line, ",");
+				//}
+				//int game_version = -1;
+				//if (line2_parsed.size() > 1) {
+				//	//Read version if it's there
+				//     game_version = string2int(line2_parsed[1]);
+				//} 
 
 				//Create GameLog object
+				const int game_version = 1;//harcoded, doesn't matter, could be removed
 				GameLog game_log(game_id, game_version);
+
 				//Copy game to log
 				_logs.push_back(game_log);
 				parsing_game = true;

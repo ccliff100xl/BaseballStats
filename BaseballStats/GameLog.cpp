@@ -46,7 +46,7 @@ bool GameLog::parseLogLine(const string line_)
 	else if (boost::equal(line_id, string("com"))) {
 		//Check if there is a play to add to
 		if (_plays.size() == 0) {
-			cout << "Comment before play: " << line_ << endl;
+			//cout << "Comment before play: " << line_ << endl;
 		} 
 		else {
 			_plays.back().addComment(line_);
@@ -70,6 +70,15 @@ bool GameLog::parseLogLine(const string line_)
 	}
 	//If "ladj" ignore, this is when batters hit out of order
 	else if (boost::equal(line_id, string("ladj"))) {
+		//TODO: do something with this...
+	}
+	//If "padj" ignore, this is when a pitcher pitches with the wrong hand
+	else if (boost::equal(line_id, string("padj"))) {
+		//TODO: do something with this...
+	}
+	//Version is supposed to be included in every game, but it isn't
+	//It should always be 1 and doesn't matter, so ignore it
+	else if (boost::equal(line_id, string("version"))) {
 		//TODO: do something with this...
 	}
 	else {

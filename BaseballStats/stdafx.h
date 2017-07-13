@@ -18,3 +18,4 @@ typedef std::vector<std::string> StringVector;
 StringVector SplitStringToVector(const std::string str_, const char* delims_);
 
 int char2int(char c_);
+int string2int(std::string s_);

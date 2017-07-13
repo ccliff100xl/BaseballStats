@@ -38,3 +38,18 @@ int char2int(char c_)
 {
 	return c_ - '0';
 }
+
+int string2int(std::string s_)
+{
+	//Just try/catch around stoi
+	try {
+		return stoi(s_);
+	}
+	catch (std::exception& e) {
+		//Print exception information
+		std::cout << "string2int ERROR: " << std::endl << e.what() << std::endl;
+		std::cout << "  Could not convert " << s_ << " to int " << std::endl;
+		//Throw the exception
+		throw(e);
+	}
+}

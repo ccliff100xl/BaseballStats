@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "stdafx.h"
 #include "SportsStatsConstants.h"
 #include "Player.h"
 class ActivePlayer : public Player
@@ -22,9 +23,9 @@ public:
 	
 	//Constructor based on starter or sub line parsed
 	ActivePlayer(std::vector<std::string> line_parsed) : Player(line_parsed[1], line_parsed[2]),
-		_team((TeamType) std::stoi(line_parsed[3])),
-		_batting_position(std::stoi(line_parsed[4])), 
-		_field_position(std::stoi(line_parsed[5])) { }
+		_team((TeamType) string2int(line_parsed[3])),
+		_batting_position(string2int(line_parsed[4])),
+		_field_position(string2int(line_parsed[5])) { }
 
 	//Accessors
 	TeamType getTeam() const { return _team; }

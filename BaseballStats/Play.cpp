@@ -10,11 +10,11 @@ Play::Play(string line_raw_) : _line_raw(line_raw_)
 	//Parse line and add to members (need to delete defaults in header)
 	vector<string> line_parsed;
 	boost::split(line_parsed, line_raw_, boost::is_any_of(","));
-	_inning = stoi(line_parsed[1]);
-	_team = (TeamType) stoi(line_parsed[2]);
+	_inning = string2int(line_parsed[1]);
+	_team = (TeamType) string2int(line_parsed[2]);
 	_player_id = line_parsed[3];
-	//If unknown, this is ??
-	if (!(boost::equal(line_parsed[4], "??"))){
+	//If unknown, this is ??, or could be ?, or could be empty
+	if (!(line_parsed[4] == "??" || line_parsed[4] == "?" || line_parsed[4].length() == 0)){
 		const string count_string = line_parsed[4];
 		_count[0] = count_string.at(0) - '0';
 		_count[1] = count_string.at(1) - '0';

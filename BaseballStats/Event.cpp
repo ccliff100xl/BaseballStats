@@ -21,7 +21,16 @@ Event::Event(const Play* play_, const string* event_string_)
 	else {
 		//From play
 		const StringVector line_parsed = SplitStringToVector(play_->getEventRaw(), "/");
-		event_string = line_parsed[0];
+		//Need to handle case where there is no modifier "/"
+		if (line_parsed.size() == 1) {
+			//No "/" found, do secondary parse up "."
+			const StringVector line_parsed_2 = SplitStringToVector(play_->getEventRaw(), ".");
+			event_string = line_parsed_2[0];
+		}
+		else {
+			//"/" was found, so first cell is event
+			event_string = line_parsed[0];
+		}
 	}
 	const size_t n_chars_event = event_string.size();
 
@@ -258,10 +267,19 @@ Event::Event(const Play* play_, const string* event_string_)
 
 void Event::setHitLocation(const DefensivePosition hit_location_)
 {
-	if (_hit_location != UNKNOWN_DEFENSIVE_POSITION) {
-		//Cannot set it twice
-		throw std::exception("Event::setHitLocation: _hit_location already set");
-	}
+	//This check is not correct.  The hit location may be set based on who fielded
+	//it, but that is not necessarily where in the field the play was made, so the 
+	//modifier should be allowed to change the location
+
+	//if (_hit_location != UNKNOWN_DEFENSIVE_POSITION) {
+	//	//Location is already set, allow it to be set again if it matches
+	//	if (_hit_location == hit_location_) {
+	//		//This does not change anything, just return
+	//		return;
+	//	}
+	//	//Cannot set it twice
+	//	throw std::exception("Event::setHitLocation: _hit_location already set");
+	//}
 	_hit_location = hit_location_;
 }
 

@@ -7,6 +7,9 @@
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
 
+//CURRENT STATUS: Trying to parse all lines, mostly finding errors in logs.
+//                Can get as far as 1991ATL.EVN
+
 //Goal: Parse all information available in the game logs
 //
 // To Do (in order):
@@ -17,6 +20,8 @@
 //         b. from modifiers - I only see them for homeruns
 // 4. Track which defensive player makes plays/errors
 // 5. Handle "badj" lines, these come before the bitter and say he batted from an unexpected side
+// 6. Add comments which are before any play to the GameLog some how
+// 7. Support info,gwrbi,chamc001, given at the beginning of a game
 
 //
 // Complicated Issues Encountered
@@ -27,9 +32,38 @@
 //2. Trailing / with no modifier following in play.  This is an error in the log, but I deal with it
 //   See play,4,1,beltb001,11,SBX,7/F/ in 2016 Giants
 //
+//3. Single ? for count when unknown, should be ?? (see play,6,0,koenm101,?,,9 in 1927WS1.EVA)
+//
+//4. Nothing for count when unknown, should be ?? (See play,1,0,adams101,,,43 in 1930BRO.EVN)
+//
+//5. Missing version, 1943PHA.EVA, just set to -1
+//
+//6. Comma inside quotes, I deleted comment IN THE FILES 1944SLN.EVN, 1949NY1.EVN
+//
+// 7. 'b' instead of 1 or 0 for inning, 1963KC1.EVA, play,5,b,gardb101,??,,NP (b changed to 0 in file)
 
+//If GAME_LOG_FILE is defined it will be used
 //2014 World Series
-//#define GAME_LOG_FILE_2014_WS "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS\\2014WS.EVE"
+//File with Error (single ?)
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1927WS1.EVA"
+//File with Error (missing ?? or ?)
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1930BRO.EVN"
+//Files with Error (invalid stoi argument)
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1943PHA.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1944SLN.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1949NY1.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1963KC1.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1964NYA.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1965CLE.EVA"
+
+//File which was missing a version line, updated code to not require it
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1978CAL.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1999ANA.EVA"
+//File which had comments at the beginning of the file
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1991ATL.EVN"
+//First file with "padj"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1995MON.EVN"
 
 //Path to files
 #define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
@@ -53,10 +87,14 @@ int main()
 		//Print team list
 		ts.printTeamList();
 
-		////Create log file list for testing
-		//StringVector log_files;
-		//log_files.push_back(GAME_LOG_FILE_2014_WS);
+		//Object to hold all file paths
+		StringVector log_files;
 
+#ifdef GAME_LOG_FILE
+		std::cout << "LOADING SINGLE FILE ONLY: " << GAME_LOG_FILE << std::endl;
+		////Create log file list for testing
+		log_files.push_back(GAME_LOG_FILE);
+#else
 		//Create path to log file containing many seasons
 		string list_file_path(GAME_LOG_DIR);
 		list_file_path.append("\\");
@@ -66,25 +104,24 @@ int main()
 		FileBasedObject file_list(list_file_path);
 
 		//Loop over each line in the list and add it to the vector of files to be parsed
-		StringVector log_files;
 		for (auto&& filename : file_list.getLines()) {
 			std::string path_full(GAME_LOG_DIR);
 			path_full.append("\\");
 			path_full.append(filename);
 			log_files.push_back(path_full);
 		}
-
+#endif
 		//Create game set
 		GameSet gs(log_files, &ts);
 
 		//Create database
+		std::cout << "Creating BaseballDatabase from GameSet and TeamSet" << std::endl;
 		BaseballDatabase db(&ts, &gs);
 
-		//Check for early exit
 #ifdef BUILD_DB_ONLY
+		//Early exit
 		return 0;
 #endif
-
 		//Run everyting (sort of a systest)
 		//Print Players
 		std::cout << std::endl << "PLAYERS" << std::endl;
