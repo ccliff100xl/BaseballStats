@@ -188,6 +188,7 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 
 	//Check if there are more than three outs
 	if (_outs > 3) {
+		play_->debugPrintDatabasePlays();
 		std::cout << "GameState::updateStateFromPlay outs: " << _outs << std::endl;
 		throw std::exception("GameState::updateStateFromPlay: too many outs");
 	}
@@ -274,11 +275,12 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 	std::vector<std::string> line_parsed_period;
 	boost::split(line_parsed_period, event_string, boost::is_any_of("."));
 
-	////Use this to find a specific play
-	//std::string event_check = "K+SB3;SB2";
-	//if (event_string == event_check) {
-	//	std::cout << "FOUND " << event_check << std::endl;
-	//}
+	//Use this to find a specific play
+	//std::string event_check = "FC5/G/DP/MREV.3X3(5);BX1(53)";
+	std::string event_check = "INVALID";
+	if (event_string == event_check) {
+		std::cout << "FOUND " << event_check << std::endl;
+	}
 
 	//Add to baserunner movements
 	if (line_parsed_period.size() > 1) {
@@ -362,8 +364,14 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 				for (auto&& c : details) {
 					if (c == 'E') {
 						is_error = true;
+						break;
 					}
 				}
+			}
+			
+			//If this was an error, that means made_out is always false?
+			if (is_error) {
+				made_out = false;
 			}
 
 			//Add BaserunnerMovement to vector
@@ -415,14 +423,20 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 				}
 				else if (movements[i_m1].getStartingBase() == 0 && play_->getEventResult() == FIELDERS_CHOICE) {
 					//Fielder's choice sometimes explicitly moves runner and sometime doesn't
-					//In this case it does, so delete redundant movement
-					movements.erase(movements.begin() + i_m2);
-					//Decrease i_m2 so cell is not skipped
-					--i_m2;
+					//In this case it does, so delete first movement, final explicit movement may be different
+					//(eg, an out was made)
+					movements.erase(movements.begin() + i_m1);
+					//Decrease i_m1 so cell is not skipped
+					--i_m1;
 				}
 				else {
-					play_->debugPrintDatabasePlays();
-					throw std::exception("GameState::updateBaserunners: Identical movements encountered");
+					//If it makes it here, it means two pieces of information in the play indicated
+					//the same basrunner movement. It seems like this should not happen, but it does, for
+					//example: play,3,1,goldp001,01,S>B,CS3(2E5).2-3;1-2, which implies 1-2 with the error, 
+					//but says it explicitly too
+					//So, do not error out
+					//play_->debugPrintDatabasePlays();
+					//throw std::exception("GameState::updateBaserunners: Identical movements encountered");
 				}
 			}
 		}
@@ -526,6 +540,10 @@ void GameState::setBatter(const std::string player_id_)
 
 	//Loop over players
 	for (auto&& p : players_) {
+		if (p == NULL) {
+			//Prevent segfault
+			throw std::exception("GameState::setBatter: Attempting to compare to NULL player");
+		}
 		if (p->getID() == player_id_) {
 			//Found match, set and return
 			_offensive_players[0] = p;

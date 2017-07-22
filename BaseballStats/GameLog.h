@@ -12,6 +12,8 @@ class GameLog
 	//Game id
 	const std::string _game_id;
 
+	//TODO: Parse _game_id to get date. Apparent boost has a date class
+
 	//version
 	const int _version;
 

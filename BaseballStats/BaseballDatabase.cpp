@@ -56,6 +56,8 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_) : _te
 				_plays.push_back(PlayRecord(&play, &state, &game, this));
 			}
 			catch (std::exception& e) {
+				//Print recent plays
+				printPlayList(20);
 				//Print some information, then throw the same exception
 				std::cout << "Error on Play: " << play.getLineRaw() << std::endl;
 				throw(e);

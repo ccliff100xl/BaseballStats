@@ -24,6 +24,11 @@ BaserunnerMovement::BaserunnerMovement(int base_start_, int base_end_, bool made
 		}
 	}
 
+	//If there was an error, there cannot be an out
+	if (made_out_ && is_error_) {
+		throw std::exception("BaserunnerMovement::BaserunnerMovement: made out with error");
+	}
+
 	//Determine if run was scored
 	if (_base_end == 4 && _made_out == false) {
 		_run_scored = true;

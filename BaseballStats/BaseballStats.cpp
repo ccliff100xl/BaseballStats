@@ -8,6 +8,11 @@
 #include "BaseballDatabase.h"
 
 //CURRENT STATUS: Can parse all regular season games, now need to process plays
+// Stuck on this play: play,4,1,lambj001,01,CX,5/P5F/NDP/SF.3-H;2XH(26)(E5/TH);1-2
+// in 2015ARI.EVN. Two outs are made on the play, but I an not counting the out E5
+// because I'm saying it's an error and not an out.  I think there was a fly ball to 3rd, 
+// he threw home (badly, an error) so the runner from 2nd had a chance to score but 
+// was out at the plate.  So, after 2XH only the first info in parantheses should count
 
 //Goal: Parse all information available in the game logs
 //
@@ -64,10 +69,15 @@
 //First file with "padj"
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1995MON.EVN"
 
+//Files used to debug game tracking
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015ANA.EVA"
+#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015ARI.EVN"
+
 //Path to files
 #define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
 //List of files in GAME_LOG_DIR
-#define LOG_FILE_LIST "event_log_file_list.txt"
+//#define LOG_FILE_LIST "event_log_file_list.txt"
+#define LOG_FILE_LIST "event_log_file_list_2016.txt"
 
 //Common to all 
 #define TEAM_LIST_FILE  "TeamList.txt"
@@ -119,6 +129,8 @@ int main()
 
 #ifdef BUILD_DB_ONLY
 		//Early exit
+		//Print success to be clear
+		std::cout << "Exiting without error" << std::endl;
 		return 0;
 #endif
 		//Run everyting (sort of a systest)
@@ -145,6 +157,8 @@ int main()
 		//Return 1 for error
 		return 1;
 	}
+	//Print success to be clear
+	std::cout << "Exiting without error" << std::endl;
 	//Return 0 for success
     return 0;
 }

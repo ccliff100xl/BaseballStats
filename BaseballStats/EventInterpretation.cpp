@@ -22,7 +22,7 @@ bool operator==(const std::string log_pattern_, const EventInterpretation & even
 	}
 
 	//If it makes it here, the event_string is char(s), get leading string from log_pattern
-	const size_t i_digit = log_pattern.find_first_of("0123456789/.+");
+	const size_t i_digit = log_pattern.find_first_of("0123456789/.+(");
 	//Make sure i_digit is > 0, or it's definitely not a match
 	if (i_digit < 1) return false;
 	//Get substring from log
@@ -63,11 +63,13 @@ const std::vector<EventInterpretation> EventInterpretation::InterpretationArray 
 	EventInterpretation("C", EventResult::CATCHER_INTERFERENCE),
 	EventInterpretation("BK", EventResult::BALK),
 	EventInterpretation("CS", EventResult::CAUGHT_STEALING), 
+	EventInterpretation("CSH", EventResult::CAUGHT_STEALING), //Caught stealing at home
 	EventInterpretation("DI", EventResult::DEFENSIVE_INDIFFERENCE), 
 	EventInterpretation("OA", EventResult::UNKNOWN_ADVANCE),
 	EventInterpretation("PB", EventResult::PASSED_BALL),
 	EventInterpretation("WP", EventResult::WILD_PITCH),
 	EventInterpretation("PO", EventResult::PICKED_OFF),
 	EventInterpretation("POCS", EventResult::PICKED_OFF_CAUGHT_STEALING),
+	EventInterpretation("POCSH", EventResult::PICKED_OFF_CAUGHT_STEALING),//picked off and caught stealing at home
 	EventInterpretation("SB", EventResult::STOLEN_BASE),
 };

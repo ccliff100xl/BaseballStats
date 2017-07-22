@@ -283,6 +283,7 @@ int PlayRecord::getNumberBases() const
 
 void PlayRecord::debugPrintDatabasePlays() const
 {
-	//Only print 100 plays
-	_db->printPlayList(10);
+	//Only print the most recent plays
+	const int n_plays_print = 50;
+	_db->printPlayList(n_plays_print);
 }
