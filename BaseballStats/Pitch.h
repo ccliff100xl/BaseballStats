@@ -25,6 +25,7 @@ public:
 		V = 'V', //called ball because pitcher went to his mouth
 		X = 'X', //ball put into play by batter
 		Y = 'Y', //ball put into play on pitchout
+		UNKNOWN, //Character not from list above
 		UNSET //default value before it's set
 	};
 private:

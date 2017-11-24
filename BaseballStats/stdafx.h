@@ -18,4 +18,5 @@ typedef std::vector<std::string> StringVector;
 StringVector SplitStringToVector(const std::string str_, const char* delims_);
 
 int char2int(char c_);
+bool char2int_check(char c_, int& out_);
 int string2int(std::string s_);

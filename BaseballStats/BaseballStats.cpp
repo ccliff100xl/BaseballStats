@@ -8,11 +8,15 @@
 #include "BaseballDatabase.h"
 
 //CURRENT STATUS: Can parse all regular season games, now need to process plays
+
+//Issue on 8/3/17, fixed in GameState::updateBaserunners by comparind the positions that
+//made the out to the positions that made the error
 // Stuck on this play: play,4,1,lambj001,01,CX,5/P5F/NDP/SF.3-H;2XH(26)(E5/TH);1-2
 // in 2015ARI.EVN. Two outs are made on the play, but I an not counting the out E5
 // because I'm saying it's an error and not an out.  I think there was a fly ball to 3rd, 
 // he threw home (badly, an error) so the runner from 2nd had a chance to score but 
-// was out at the plate.  So, after 2XH only the first info in parantheses should count
+// was out at the plate.  So, after 2XH if there is an error, but also an additional play
+// it will turn the play back into an out
 
 //Goal: Parse all information available in the game logs
 //
@@ -60,6 +64,11 @@
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1963KC1.EVA"
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1964NYA.EVA"
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1965CLE.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015BAL.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015CHA.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015DET.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2016CHA.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2016PHI.EVN"
 
 //File which was missing a version line, updated code to not require it
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1978CAL.EVA"
@@ -71,7 +80,7 @@
 
 //Files used to debug game tracking
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015ANA.EVA"
-#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015ARI.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015ARI.EVN"
 
 //Path to files
 #define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
@@ -82,7 +91,7 @@
 //Common to all 
 #define TEAM_LIST_FILE  "TeamList.txt"
 
-//Flag to control how much is printed
+//Flag to control how much is printed (comment out to disable)
 #define BUILD_DB_ONLY =1
 
 using namespace std;

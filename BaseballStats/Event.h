@@ -28,7 +28,7 @@ public:
 
 	//Helper
 	static DefensivePosition convertPositionIntCharToDefensivePosition(const char fielder_);
-	static bool isErrorInEventString(const std::string event_string_);
+	static bool doesErrorNegateOut(const std::string event_string_);
 private:
 	static EventResult parseBattingResult(const std::string event_string_);
 };

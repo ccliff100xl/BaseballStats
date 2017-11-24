@@ -39,6 +39,19 @@ int char2int(char c_)
 	return c_ - '0';
 }
 
+//Will return true if OK, false if error
+bool char2int_check(char c_, int& out_)
+{
+	out_ =  c_ - '0';
+	//Only valid values for out_ are -9 to +9
+	if (out_ < -9 || out_ > 9) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
 int string2int(std::string s_)
 {
 	//Just try/catch around stoi

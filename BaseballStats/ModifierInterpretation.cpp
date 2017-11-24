@@ -8,10 +8,11 @@ bool operator==(const std::string log_pattern_, const ModifierInterpretation & m
 	//Get string to compare to 
 	const string& modifier_string = modifier_interpretation_._log_pattern;
 
-	//Remove ! (exceptional play) and ? (uncertainty) source: http://www.retrosheet.org/eventfile.htm
+	//Remove ! (exceptional play) and ?,# (uncertainty) source: http://www.retrosheet.org/eventfile.htm
 	std::string log_pattern = log_pattern_;
 	boost::erase_all(log_pattern, "!");
 	boost::erase_all(log_pattern, "?");
+	boost::erase_all(log_pattern, "#");
 
 	//If it makes it here, the modifier_string is char(s), get leading string from log_pattern
 	const size_t i_digit = log_pattern.find_first_of("0123456789");

@@ -65,9 +65,21 @@ DefensivePosition PlayRecord::ParseModifiersToVector(std::string play_string_, s
 	vector<string> line_parsed_period;
 	boost::split(line_parsed_period, play_string_, boost::is_any_of("."));
 
+	//There may be a () which contains a /, so parse for that first
+	StringVector line_parsed_parantheses = SplitStringToVector(line_parsed_period[0], "()");
+
 	//Parse text after / from text before "." found above
 	vector<string> line_parsed;
-	boost::split(line_parsed, line_parsed_period[0], boost::is_any_of("/"));
+	if (line_parsed_parantheses.size() > 1) {
+		//There was one of more (), take info after (), which is final entry
+		boost::split(line_parsed, line_parsed_parantheses[line_parsed_parantheses.size()-1], boost::is_any_of("/"));
+	}
+	else {
+		//No parantheses, parse original
+		boost::split(line_parsed, line_parsed_period[0], boost::is_any_of("/"));
+	}
+
+
 
 	//If length is less than 2, nothing to do
 	if (line_parsed.size() < 2) return hit_location;

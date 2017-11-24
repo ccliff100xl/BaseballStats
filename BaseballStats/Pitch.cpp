@@ -26,9 +26,11 @@ Pitch::Pitch(char type_, std::string info_)
 		_type != U &&
 		_type != V &&
 		_type != Y) {
-		//This is not valid
-		std::cout << type_ << std::endl;
-		throw std::exception("Unrecognized pitch type character");
+		//This is not valid, for now just accept it
+		_type = Pitch::UNKNOWN;
+		//Print warning
+		std::cout << "Warning, unknown pitch type: "<< type_ << std::endl;
+		//throw std::exception("Unrecognized pitch type character");
 	}
 
 	//Set members from info

@@ -34,15 +34,15 @@ Event::Event(const Play* play_, const string* event_string_)
 	}
 	const size_t n_chars_event = event_string.size();
 
-	//////DEBUG: Use this to find a specific play
-	std::string line_check = "play,1,1,tomay001,00,X,FC5/G/DP/MREV.3X3(5);BX1(53)";
-	const string line_current_full = play_->getLineRaw();
-	if (line_current_full == line_check) {
-		std::cout << "FOUND " << line_check << std::endl;
-	}
-	else {
-		//std::cout << line_current_full << " NOT " << line_check << std::endl;
-	}
+	////////DEBUG: Use this to find a specific play
+	//std::string line_check = "play,1,1,tomay001,00,X,FC5/G/DP/MREV.3X3(5);BX1(53)";
+	//const string line_current_full = play_->getLineRaw();
+	//if (line_current_full == line_check) {
+	//	std::cout << "FOUND " << line_check << std::endl;
+	//}
+	//else {
+	//	//std::cout << line_current_full << " NOT " << line_check << std::endl;
+	//}
 
 	//Parse the batting result
 	_batting_result = parseBattingResult(event_string);
@@ -78,7 +78,7 @@ Event::Event(const Play* play_, const string* event_string_)
 				//Multiple numbers is a ground ball
 				_batting_result = GROUND_OUT;
 				_hit_location = convertPositionIntCharToDefensivePosition(event_parsed[0][0]);
-				//But, there could be an error, search for E
+				//But, there could be an error
 				if (event_parsed[0].find_first_of('E') != string::npos) {
 					//There was an error, hitter goes to first with no out
 					_baserunner_movements.push_back(BaserunnerMovement(0, 1, false));
@@ -137,6 +137,18 @@ Event::Event(const Play* play_, const string* event_string_)
 				_baserunner_movements.push_back(BaserunnerMovement(0, 1));
 			}
 		}
+		else if (n_cell == 5) {
+			//5 cells, grounded into triple play, batter got out
+			_batting_result = GROUND_OUT;
+			//Figure out who got out
+			const int baserunner_out_1 = atoi(event_parsed[1].c_str());
+			const int baserunner_out_2 = atoi(event_parsed[3].c_str());
+			//Add the movements
+			_baserunner_movements.push_back(BaserunnerMovement(baserunner_out_1, baserunner_out_1 + 1, true));
+			_baserunner_movements.push_back(BaserunnerMovement(baserunner_out_2, baserunner_out_2 + 1, true));
+			//Finally, add batter getting out
+			_baserunner_movements.push_back(BaserunnerMovement(0, 1, true));
+		}
 		else {
 			//Not expecting so many cells, error
 			std::cout << "Event: " << event_string << std::endl;
@@ -153,7 +165,7 @@ Event::Event(const Play* play_, const string* event_string_)
 	case CAUGHT_STEALING:
 	{
 		//First decide if there was an error
-		const bool error_occured = isErrorInEventString(event_string);
+		const bool error_occured = doesErrorNegateOut(event_string);
 		//If there was an error, than this is not an out
 		const bool made_out = !error_occured;
 		//Determine which baserunner got out
@@ -183,6 +195,15 @@ Event::Event(const Play* play_, const string* event_string_)
 		//It seems like the base given is where the out is made as he's stealing, so 
 		//he's coming from one before
 		_baserunner_movements.push_back(BaserunnerMovement(i_base_out-1, i_base_out, true));
+
+		//Check for error
+		const bool is_error = doesErrorNegateOut(event_string);
+		if (is_error) {
+			//Found an error, get rid of BaserunnerMovement just added
+			_baserunner_movements.pop_back();
+			//Replace it with successful advance due to error
+			_baserunner_movements.push_back(BaserunnerMovement(i_base_out - 1, i_base_out, false, true));
+		}
 	}
 	break;
 	case PICKED_OFF:
@@ -193,7 +214,7 @@ Event::Event(const Play* play_, const string* event_string_)
 		_baserunner_movements.push_back(BaserunnerMovement(i_base_out, i_base_out, true));
 
 		//Check for error
-		const bool is_error = isErrorInEventString(event_string);
+		const bool is_error = doesErrorNegateOut(event_string);
 		if (is_error) {
 			//Found an error, get rid of BaserunnerMovement just added
 			_baserunner_movements.pop_back();
@@ -246,8 +267,8 @@ Event::Event(const Play* play_, const string* event_string_)
 		vector<string> event_parsed;
 		boost::split(event_parsed, event_string, boost::is_any_of(";"));
 		for (auto&& s : event_parsed) {
-			//Add movement, format is SB$
-			const int base_final = s[2] - '0';
+			//Add movement, format is SB$, handle H for home (4)
+			const int base_final = (s[2] == 'H') ? 4 : s[2] - '0';
 			_baserunner_movements.push_back(BaserunnerMovement(base_final-1, base_final));
 		}
 	}
@@ -276,7 +297,9 @@ Event::Event(const Play* play_, const string* event_string_)
 				if (result_2 != STOLEN_BASE &&
 					result_2 != CAUGHT_STEALING &&
 					result_2 != UNKNOWN_ADVANCE &&
+					result_2 != DEFENSIVE_INDIFFERENCE &&
 					result_2 != PICKED_OFF &&
+					result_2 != PICKED_OFF_CAUGHT_STEALING &&
 					result_2 != WILD_PITCH &&
 					result_2 != PASSED_BALL &&
 					result_2 != ERROR) {
@@ -335,8 +358,9 @@ DefensivePosition Event::convertPositionIntCharToDefensivePosition(const char fi
 	return static_cast<DefensivePosition>(fielder - 1);
 }
 
-//This will parse an event string to see if there is an error in a trailing ()
-bool Event::isErrorInEventString(const std::string event_string_)
+//This will parse an event string to see if there is an error in the FIRST trailing ()
+//It only negates the out if it is in the first ()
+bool Event::doesErrorNegateOut(const std::string event_string_)
 {
 	//Find anything in ()
 	const StringVector event_parsed = SplitStringToVector(event_string_, "()");

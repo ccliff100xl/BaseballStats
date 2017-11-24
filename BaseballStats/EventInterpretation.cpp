@@ -8,7 +8,7 @@ bool operator==(const std::string log_pattern_, const EventInterpretation & even
 	//Get string to compare to 
     const string& event_string = event_interpretation_._log_pattern;
 
-	//Remove ! (exceptional play) and ? (uncertainty) source: http://www.retrosheet.org/eventfile.htm
+	//Remove ! (exceptional play) and ?,# (uncertainty) source: http://www.retrosheet.org/eventfile.htm
 	std::string log_pattern = log_pattern_;
 	boost::erase_all(log_pattern, "!");
 	boost::erase_all(log_pattern, "?");
@@ -22,7 +22,7 @@ bool operator==(const std::string log_pattern_, const EventInterpretation & even
 	}
 
 	//If it makes it here, the event_string is char(s), get leading string from log_pattern
-	const size_t i_digit = log_pattern.find_first_of("0123456789/.+(");
+	const size_t i_digit = log_pattern.find_first_of("0123456789/.+(;");
 	//Make sure i_digit is > 0, or it's definitely not a match
 	if (i_digit < 1) return false;
 	//Get substring from log
@@ -72,4 +72,5 @@ const std::vector<EventInterpretation> EventInterpretation::InterpretationArray 
 	EventInterpretation("POCS", EventResult::PICKED_OFF_CAUGHT_STEALING),
 	EventInterpretation("POCSH", EventResult::PICKED_OFF_CAUGHT_STEALING),//picked off and caught stealing at home
 	EventInterpretation("SB", EventResult::STOLEN_BASE),
+	EventInterpretation("SBH", EventResult::STOLEN_BASE) // Stole home
 };

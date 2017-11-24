@@ -358,21 +358,56 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 			//Get rid of first element, since it's the standard movement
 			line_parsed_details.erase(line_parsed_details.begin());
 			bool is_error = false;
-			//Loop over all details
+
+			// At this point, the basics of the play are known. But, the details after the play may actually
+			// change the basic results.  For example: play,4,1,lambj001,01,CX,5/P5F/NDP/SF.3-H;2XH(26)(E5/TH);1-2
+			// The runner from 2nd was actually out at home, the E5/TH is what allowed him to go from 2-H instead 
+			// of just 2-3.
+			// So, in line_parsed_details, if the only detail is an error, it negates the out, if there
+			// is an error and an additional play, then the additional play is an out, which negates the error
+		    // (i.e. a double negative, so it is an out again)
+			
+			//Find errors
+			std::vector<int> error_positions;
+			//Find position which made outs
+			std::vector<int> out_positions; //Store play, eg 92 (RF to Catcher) as single int
 			for (auto&& details : line_parsed_details) {
-				//Check if ANY char in the detail is an error
-				for (auto&& c : details) {
-					if (c == 'E') {
-						is_error = true;
+				//Check if any char is an error
+				bool found_error_local = false;
+				for (int ichar = 0; ichar < details.size(); ichar++) {
+					if (details[ichar] == 'E') {
+						//Error, add it
+						if (ichar + 1 == details.size()) {
+							throw std::exception("GameState::updateBaserunners: Missing position for error");
+						}
+						const int position = char2int(details[ichar+1]);
+						error_positions.push_back(position);
+						found_error_local = true;
 						break;
 					}
 				}
+				if (found_error_local == false) {
+					//NOT error, add it if numeric
+					const int position_start = details[0] - '0';
+					if (position_start > 0 && position_start < 10) {
+						const int positions_out_local = string2int(details);
+						out_positions.push_back(positions_out_local);
+					}
+				}
 			}
-			
-			//If this was an error, that means made_out is always false?
-			if (is_error) {
+
+			////Make sure there is only one error.  THIS IS OK
+			//if (error_positions.size() > 1) {
+			//	throw std::exception("GameState::updateBaserunners: Multiple errors on one play");
+			//}
+
+			//Check for simple case of error and no other plays, out is negated and error is set
+			if (error_positions.size() > 0 && out_positions.size() == 0) {
+				is_error = true;
 				made_out = false;
 			}
+
+			//TODO: Handle other cases here?
 
 			//Add BaserunnerMovement to vector
 			movements.push_back(BaserunnerMovement(base_start, base_end, made_out, is_error));
@@ -396,18 +431,28 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 				//	throw std::exception("GameState::updateBaserunners: Multiple movements without error");
 				//}
 
-				//Delete the movement with the lower ending base
-				if (movements[i_m1].getEndingBase() < movements[i_m2].getEndingBase()) {
-					//Delete i_m1
+				////Delete the movement with the lower ending base
+				// I THINK THIS IS WRONG, IT SHOULD DELETE THE FIRST ENTRY ASSUMING
+				// THE SECOND IS EXPLICIT AND CORRECT
+				//if (movements[i_m1].getEndingBase() < movements[i_m2].getEndingBase()) {
+				//	//Delete i_m1
+				//	movements.erase(movements.begin() + i_m1);
+				//	//Decrease i_m1 so cell is not skipped
+				//	--i_m1;
+				//}
+				//else if (movements[i_m1].getEndingBase() > movements[i_m2].getEndingBase()) {
+				//	//Delete i_m2
+				//	movements.erase(movements.begin() + i_m2);
+				//	//Decrease i_m2 so cell is not skipped
+				//	--i_m2;
+				//}
+
+				//If the ending base is different, assume the later, explicit, movement is correct
+				if (movements[i_m1].getEndingBase() != movements[i_m2].getEndingBase()) {
+					//Delete the first entry
 					movements.erase(movements.begin() + i_m1);
 					//Decrease i_m1 so cell is not skipped
 					--i_m1;
-				}
-				else if (movements[i_m1].getEndingBase() > movements[i_m2].getEndingBase()) {
-					//Delete i_m2
-					movements.erase(movements.begin() + i_m2);
-					//Decrease i_m2 so cell is not skipped
-					--i_m2;
 				}
 				else if (movements[i_m1].getStartingBase() == 0 &&
 					movements[i_m1].getEndingBase() == 4) {
