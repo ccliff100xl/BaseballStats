@@ -12,6 +12,7 @@ bool operator==(const std::string log_pattern_, const EventInterpretation & even
 	std::string log_pattern = log_pattern_;
 	boost::erase_all(log_pattern, "!");
 	boost::erase_all(log_pattern, "?");
+	boost::erase_all(log_pattern, "#");
 
 	//Chech if the first char string of event_string is a digit
 	//'$' is code for digit

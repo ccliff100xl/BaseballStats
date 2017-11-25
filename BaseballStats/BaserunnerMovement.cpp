@@ -8,10 +8,13 @@ BaserunnerMovement::BaserunnerMovement(int base_start_, int base_end_, bool made
     _is_error(is_error_)
 {
 	//Make sure bases are valid
-	//Cannot go backwards
-	if (_base_start > _base_end) {
-		throw std::exception("BaserunnerMovement::BaserunnerMovement: base start > base end");
-	}
+
+	////Cannot go backwards
+	//if (_base_start > _base_end) {
+	//	//This actually happens in 1938SLA.EVA and 2013MIL.EVN, so I will allow it if there is an out
+	//	//throw std::exception("BaserunnerMovement::BaserunnerMovement: base start > base end");
+	//}
+
 	//Cannot start as 4 (which means scored at home)
 	if (_base_start != 0 && _base_start != 1 && _base_start != 2 && _base_start != 3) {
 		throw std::exception("BaserunnerMovement::BaserunnerMovement: Invalid base start");
@@ -37,5 +40,11 @@ BaserunnerMovement::BaserunnerMovement(int base_start_, int base_end_, bool made
 
 bool baserunnerMovementCompare(const BaserunnerMovement& m1_, const BaserunnerMovement& m2_)
 {
+	//If one of the movements is a backwards movement, consider that greater than
+	//This is needed to handle a strange case in 2013MIL.EVN
+	if (m1_.getStartingBase() > m1_.getEndingBase()) return false;
+	if (m2_.getStartingBase() > m2_.getEndingBase()) return true;
+
+	//Default, sort based on starting base
 	return m1_.getStartingBase() > m2_.getStartingBase();
 }

@@ -19,17 +19,45 @@ Event::Event(const Play* play_, const string* event_string_)
 		event_string = *event_string_;
 	}
 	else {
-		//From play
-		const StringVector line_parsed = SplitStringToVector(play_->getEventRaw(), "/");
-		//Need to handle case where there is no modifier "/"
-		if (line_parsed.size() == 1) {
-			//No "/" found, do secondary parse up "."
-			const StringVector line_parsed_2 = SplitStringToVector(play_->getEventRaw(), ".");
-			event_string = line_parsed_2[0];
+		////From play
+		//There will be () scattered throughout which need to be handled seperately
+		//So, parse those first
+		//Make sure first char isn't a (
+		if (play_->getEventRaw()[0] == '(') {
+			throw("Event::Event: invalid leading ( in event string");
 		}
-		else {
-			//"/" was found, so first cell is event
-			event_string = line_parsed[0];
+		const StringVector line_parsed_parantheses = SplitStringToVector(play_->getEventRaw(), "()");
+		//Now, only search outside of (), index 0, 2, ...
+		//Find which comes first, / or ., create string of everything before (including ())
+		bool found_event_end = false;
+		for (int icell = 0; icell < line_parsed_parantheses.size(); icell++) {
+			//If icell is odd, add contents to string inside of parantheses
+			if (icell % 2 == 1) {
+				event_string.append("(");
+				event_string.append(line_parsed_parantheses[icell]);
+				event_string.append(")");
+				continue;
+			}
+			//This is even, so search for . or /
+			//If not found, add char to string
+			for (auto&& c : line_parsed_parantheses[icell]) {
+				if (c == '.' || c == '/') {
+					found_event_end = true;
+					break;
+				}
+				else {
+					//If this is an FYI character, ignore it
+					if (c != '!' && c != '?' && c != '#') {
+						//No clean way to create string from char?
+						const char str[2] = { c, '\0' };
+						event_string.append(str);
+					}
+				}
+			}
+			if (found_event_end) {
+				//Done, break
+				break;
+			}
 		}
 	}
 	const size_t n_chars_event = event_string.size();
@@ -63,7 +91,6 @@ Event::Event(const Play* play_, const string* event_string_)
 		//Seperate string based on locations of ( )
 		const StringVector event_parsed = SplitStringToVector(event_string, "()");
 		const size_t n_cell = event_parsed.size();
-
 		//If there is a single cell, it's easy to handle
 		if (n_cell == 1) {
 			if (event_parsed[0].size() == 1) {
@@ -101,13 +128,13 @@ Event::Event(const Play* play_, const string* event_string_)
 				throw("Event::Event: invalid number of chars in ()");
 			}
 			//Check if batter got out
-			if (event_parsed[1] == "H") {
+			if (event_parsed[1] == "B") {
 				//Assume out at first
 				_baserunner_movements.push_back(BaserunnerMovement(0, 1, true));
 			}
 			else {
 				//Someone other than batter got out
-				const int baserunner_out = atoi(event_parsed[1].c_str());
+				const int baserunner_out = string2int(event_parsed[1]);
 				_baserunner_movements.push_back(BaserunnerMovement(baserunner_out, baserunner_out + 1, true));
 				//That means that batter got on
 				_baserunner_movements.push_back(BaserunnerMovement(0, 1));
@@ -138,7 +165,7 @@ Event::Event(const Play* play_, const string* event_string_)
 			}
 		}
 		else if (n_cell == 5) {
-			//5 cells, grounded into triple play, batter got out
+			//5 cells, grounded into triple play, batter got out (implicit)
 			_batting_result = GROUND_OUT;
 			//Figure out who got out
 			const int baserunner_out_1 = atoi(event_parsed[1].c_str());
@@ -148,6 +175,18 @@ Event::Event(const Play* play_, const string* event_string_)
 			_baserunner_movements.push_back(BaserunnerMovement(baserunner_out_2, baserunner_out_2 + 1, true));
 			//Finally, add batter getting out
 			_baserunner_movements.push_back(BaserunnerMovement(0, 1, true));
+		}
+		else if (n_cell == 6) {
+			//6 cells, grounded into triple play, all outs explicit
+			_batting_result = GROUND_OUT;
+			//Figure out who got out
+			const int baserunner_out_1 = atoi(event_parsed[1].c_str());
+			const int baserunner_out_2 = atoi(event_parsed[3].c_str());
+			const int baserunner_out_3 = atoi(event_parsed[5].c_str());
+			//Add the movements
+			_baserunner_movements.push_back(BaserunnerMovement(baserunner_out_1, baserunner_out_1 + 1, true));
+			_baserunner_movements.push_back(BaserunnerMovement(baserunner_out_2, baserunner_out_2 + 1, true));
+			_baserunner_movements.push_back(BaserunnerMovement(baserunner_out_3, baserunner_out_3 + 1, true));
 		}
 		else {
 			//Not expecting so many cells, error
@@ -164,27 +203,32 @@ Event::Event(const Play* play_, const string* event_string_)
 	break;
 	case CAUGHT_STEALING:
 	{
-		//First decide if there was an error
-		const bool error_occured = doesErrorNegateOut(event_string);
-		//If there was an error, than this is not an out
-		const bool made_out = !error_occured;
-		//Determine which baserunner got out
-		if (event_string[2] == '2') {
-			//Out from 1 to 2
-			_baserunner_movements.push_back(BaserunnerMovement(1, 2, made_out, error_occured));
-		}
-		else if (event_string[2] == '3') {
-			//Out from 2 to 3
-			_baserunner_movements.push_back(BaserunnerMovement(2, 3, made_out, error_occured));
-		}
-		else if (event_string[2] == 'H') {
-			//Out from 3 to H
-			_baserunner_movements.push_back(BaserunnerMovement(3, 4, made_out, error_occured));
-		}
-		else {
-			//Nothing else allowed
-			std::cout << event_string << std::endl;
-			throw std::exception("Event::Event: Invalid stolen base");
+		//There may be multiples, seperated by ;
+		vector<string> event_parsed;
+		boost::split(event_parsed, event_string, boost::is_any_of(";"));
+		for (auto&& event_string_single : event_parsed) {
+			//First decide if there was an error
+			const bool error_occured = doesErrorNegateOut(event_string_single);
+			//If there was an error, than this is not an out
+			const bool made_out = !error_occured;
+			//Determine which baserunner got out
+			if (event_string_single[2] == '2') {
+				//Out from 1 to 2
+				_baserunner_movements.push_back(BaserunnerMovement(1, 2, made_out, error_occured));
+			}
+			else if (event_string_single[2] == '3') {
+				//Out from 2 to 3
+				_baserunner_movements.push_back(BaserunnerMovement(2, 3, made_out, error_occured));
+			}
+			else if (event_string_single[2] == 'H') {
+				//Out from 3 to H
+				_baserunner_movements.push_back(BaserunnerMovement(3, 4, made_out, error_occured));
+			}
+			else {
+				//Nothing else allowed
+				std::cout << event_string_single << std::endl;
+				throw std::exception("Event::Event: Invalid stolen base");
+			}
 		}
 	}
 		break;
@@ -225,7 +269,12 @@ Event::Event(const Play* play_, const string* event_string_)
 	case SINGLE:
 		//Add movement from batter to 1
 		_baserunner_movements.push_back(BaserunnerMovement(0, 1));
-		if (event_string.size() > 1) _hit_location = convertPositionIntCharToDefensivePosition(event_string[1]);
+		//S0 means hit to position 0, which is invalid.  See in 1941PHA.EVA, so check for it
+		if (event_string.size() > 1) {
+			if (event_string[1] != '0') {
+				_hit_location = convertPositionIntCharToDefensivePosition(event_string[1]);
+			}
+		}
 		break;
 	case DOUBLE:
 		//Add movement from batter to 2
@@ -307,9 +356,15 @@ Event::Event(const Play* play_, const string* event_string_)
 					std::cout << "Result: " << BattingResultString[result_2] << std::endl;
 					throw exception("K+Event not allowed");
 				}
+				//This play is causing problems: play,7,0,winst101,??,,K+E2.1-2
+				//The error only allowed the runner to go to second, it did not allow the batter to
+				//get to first, so, I will not add baserunner movement for errors
 				//Add whatever happened in that event to this one
-				_baserunner_movements.insert(std::end(_baserunner_movements),
-					std::begin(event_2._baserunner_movements), std::end(event_2._baserunner_movements));
+				if (result_2 != ERROR) {
+					_baserunner_movements.insert(std::end(_baserunner_movements),
+						std::begin(event_2._baserunner_movements), std::end(event_2._baserunner_movements));
+
+				}
 			}
 		}
 		else {

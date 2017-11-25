@@ -7,7 +7,10 @@
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
 
-//CURRENT STATUS: Can parse all regular season games, now need to process plays
+//CURRENT STATUS: Need to handle this play from 1997FLO.EVN
+//play, 1, 0, lockk001, 22, FCBB1, POCS2(134); CSH(42) / DP
+//Cannot handle picked off caught stealing and caught stealing in the same row.
+//Show probably combine handling of those two and PO
 
 //Issue on 8/3/17, fixed in GameState::updateBaserunners by comparind the positions that
 //made the out to the positions that made the error
@@ -69,6 +72,17 @@
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015DET.EVA"
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2016CHA.EVA"
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2016PHI.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1922NY1.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1925NY1.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1937CIN.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1938SLA.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1941PHA.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1946DET.EVA"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1947BRO.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1947NY1.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2013MIL.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2007SEA.EVA"
+#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1997FLO.EVN"
 
 //File which was missing a version line, updated code to not require it
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1978CAL.EVA"
@@ -85,8 +99,8 @@
 //Path to files
 #define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
 //List of files in GAME_LOG_DIR
-//#define LOG_FILE_LIST "event_log_file_list.txt"
-#define LOG_FILE_LIST "event_log_file_list_2016.txt"
+#define LOG_FILE_LIST "event_log_file_list.txt"
+//#define LOG_FILE_LIST "event_log_file_list_2016.txt"
 
 //Common to all 
 #define TEAM_LIST_FILE  "TeamList.txt"
@@ -129,36 +143,47 @@ int main()
 			log_files.push_back(path_full);
 		}
 #endif
-		//Create game set
-		GameSet gs(log_files, &ts);
+		//Parse files individually to find problems faster 
+		const long n_files = static_cast<long>( log_files.size() );
+		for (long ifile = 0; ifile < n_files; ifile++) {
+			//Try last files first
+			const long i_array = n_files - ifile - 1;
+			const std::string filepath = log_files[i_array];
+			//Make vector with just one file to match interface
+			StringVector log_file_single;
+			log_file_single.push_back(filepath);
+			//Create game set
+			GameSet gs(log_file_single, &ts);
 
-		//Create database
-		std::cout << "Creating BaseballDatabase from GameSet and TeamSet" << std::endl;
-		BaseballDatabase db(&ts, &gs);
+			//Create database
+			std::cout << "Creating BaseballDatabase from GameSet and TeamSet" << std::endl;
+			BaseballDatabase db(&ts, &gs);
 
-#ifdef BUILD_DB_ONLY
-		//Early exit
+#ifndef BUILD_DB_ONLY
+			//Run everyting (sort of a systest)
+			//Print Players
+			std::cout << std::endl << "PLAYERS" << std::endl;
+			db.printPlayerList();
+			//Print averages
+			std::cout << std::endl << "BATTING AVERAGES" << std::endl;
+			db.printAllBattingAverages();
+			//Print slugging
+			std::cout << std::endl << "SLUGGING PERCENTAGES" << std::endl;
+			db.printAllSluggingPercentages();
+			//Print Plays
+			std::cout << std::endl << "PLAYS" << std::endl;
+			db.printPlayList();
+
+			//Make another database to see printing when it happens
+			std::cout << std::endl << "DATABASE CREATION" << std::endl;
+			BaseballDatabase db2(&ts, &gs);
+#endif // !BUILD_DB_ONLY
+
+		}
+
 		//Print success to be clear
 		std::cout << "Exiting without error" << std::endl;
 		return 0;
-#endif
-		//Run everyting (sort of a systest)
-		//Print Players
-		std::cout << std::endl << "PLAYERS" << std::endl;
-		db.printPlayerList();
-		//Print averages
-		std::cout << std::endl << "BATTING AVERAGES" << std::endl;
-		db.printAllBattingAverages();
-		//Print slugging
-		std::cout << std::endl << "SLUGGING PERCENTAGES" << std::endl;
-		db.printAllSluggingPercentages();
-		//Print Plays
-		std::cout << std::endl << "PLAYS" << std::endl;
-		db.printPlayList();
-
-		//Make another database to see printing when it happens
-		std::cout << std::endl << "DATABASE CREATION" << std::endl;
-		BaseballDatabase db2(&ts, &gs);
 
 	} catch (std::exception& e) {
 		//Print exception information

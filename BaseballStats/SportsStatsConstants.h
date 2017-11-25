@@ -124,7 +124,8 @@ enum PlayModifier {
 	PM_TP,    //unspecified triple play
 	PM_UINT,  //umpire interference
 	PM_UREV,  //umpire review of call on the field
-	PM_HL // modifier is hit location, actual location will have to be saved in some other way
+	PM_HL, // modifier is hit location, actual location will have to be saved in some other way
+	PM_UNKNOWN, // unknown modifier for undefined strings
 };
 
 //Define readable names for batting results
@@ -172,7 +173,8 @@ static std::map< PlayModifier, const char * > PlayModifierString = {
 	{ PM_TP,    "unspecified triple play" },
 	{ PM_UINT,  "umpire interference" },
 	{ PM_UREV,  "umpire review of call on the field" },
-    { PM_HL,    "<hit location>" }
+    { PM_HL,    "<hit location>" },
+    { PM_HL,    "<unknown>" }
 };
 
 //Define enums for defensive positions

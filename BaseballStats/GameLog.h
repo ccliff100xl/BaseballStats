@@ -53,6 +53,9 @@ public:
 	//Get vectors to iterate over
 	const  std::vector<ActivePlayer>& getStarters() const { return _starters; }
 	const  std::vector<Play>& getPlays() const { return _plays; }
+
+	//Identify if this is a weird game where home team hits first
+	bool didHomeTeamHitFirst() const { return _plays[0].getTeam() == TEAM_HOME; }
 private:
 	std::string getInfoItemInformation(std::string label_) const;
 };

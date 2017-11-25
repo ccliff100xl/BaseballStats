@@ -61,6 +61,7 @@ public:
 
 	//Accessors
 	const ActivePlayer* getBatter() const;
+	TeamType getTeamBatting() const;
 
 	//Setters
 	void setBatter(const std::string player_id_);

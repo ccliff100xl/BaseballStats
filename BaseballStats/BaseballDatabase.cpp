@@ -57,7 +57,7 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_) : _te
 			}
 			catch (std::exception& e) {
 				//Print recent plays
-				printPlayList(20);
+				printPlayList(10);
 				//Print some information, then throw the same exception
 				std::cout << "Error on Play: " << play.getLineRaw() << std::endl;
 				throw(e);

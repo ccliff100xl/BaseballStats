@@ -16,6 +16,11 @@ PlayRecord::PlayRecord(const Play* play_, GameState* state_, const GameLog * con
 	_db(db_), 
 	_state_start(*state_)
 {
+	//Make sure the innings match
+	if (play_->getTeam() != state_->getTeamBatting()) {
+		throw exception("PlayRecord::PlayRecord: play_->getTeam() does not match state_");
+	}
+	
 	//Update batter in input state
 	state_->setBatter(getBatterID());
 
@@ -79,8 +84,6 @@ DefensivePosition PlayRecord::ParseModifiersToVector(std::string play_string_, s
 		boost::split(line_parsed, line_parsed_period[0], boost::is_any_of("/"));
 	}
 
-
-
 	//If length is less than 2, nothing to do
 	if (line_parsed.size() < 2) return hit_location;
 
@@ -113,8 +116,10 @@ DefensivePosition PlayRecord::ParseModifiersToVector(std::string play_string_, s
 		//Make sure a match was found
 		if (!match_found) {
 			cout << "Line: " << play_string_ << endl;
-			cout << modifier_string_in << " not recognized" << endl;
-			throw exception("Modifier not recognized");
+			cout << " Warning: " << modifier_string_in << " not recognized" << endl;
+			//Allow it, just save as unknown
+			//throw exception("Modifier not recognized");
+			modifiers_.push_back(PM_UNKNOWN);
 		}
 	}
 	//Return the hit location
@@ -296,6 +301,6 @@ int PlayRecord::getNumberBases() const
 void PlayRecord::debugPrintDatabasePlays() const
 {
 	//Only print the most recent plays
-	const int n_plays_print = 50;
+	const int n_plays_print = 10;
 	_db->printPlayList(n_plays_print);
 }

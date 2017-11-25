@@ -97,4 +97,10 @@ const std::vector<ModifierInterpretation> ModifierInterpretation::Interpretation
 	ModifierInterpretation("UINT",PM_UINT), //umpire interference
 	ModifierInterpretation("UREV",PM_UREV), //umpire review of call on the field
 	ModifierInterpretation("",PM_HL), //The hit location is given by a number, this needs special handling
+	//Too hard to track each unknwon modifier, just mark unknowns and print warning
+	//ModifierInterpretation("B",PM_UNKNOWN), //Encountered, but unknwon
+	//ModifierInterpretation("THH",PM_UNKNOWN), //Encountered, but unknown
+	//ModifierInterpretation("U",PM_UNKNOWN), //Encountered, but unknown
+	//ModifierInterpretation("S",PM_UNKNOWN), //Encountered, but unknown
+	//ModifierInterpretation("RH",PM_UNKNOWN), //Encountered, but unknown
 };

@@ -34,6 +34,16 @@ GameState::GameState(const GameLog* log_) : _log(log_) {
 				throw std::exception("GameState::GameState: Invalid Team");
 			}
 		}
+
+		//It's possible that a game can start in the BOTTON of the inning.
+		//See: 2007SEA.EVA CLEvSEA
+		//So, set inning based on first play
+		const std::vector<Play>& plays = log_->getPlays();
+		if (_log->didHomeTeamHitFirst()) {
+			//This is the weird case where the home team hits first
+			//So, call it the bottom of the inning
+			_inning_half = INNING_BOTTOM;
+		}
 	}
 }
 
@@ -204,12 +214,26 @@ const GameState GameState::updateStateFromPlay(const PlayRecord* play_)
 		_offensive_players[1] = NULL;
 		_offensive_players[2] = NULL;
 		_offensive_players[3] = NULL;
-		if (_inning_half == INNING_TOP) {
-			_inning_half = INNING_BOTTOM;
-		}
-		else {
-			_inning++;
-			_inning_half = INNING_TOP;
+
+		//Handle strange case where home team hits first
+		if (_log->didHomeTeamHitFirst()) {
+			if (_inning_half == INNING_TOP) {
+				//Top was really bottom, so incremement inning
+				_inning_half = INNING_BOTTOM;
+				_inning++;
+			}
+			else {
+				_inning_half = INNING_TOP;
+			}
+		} else {
+			//This is the standard case
+			if (_inning_half == INNING_TOP) {
+				_inning_half = INNING_BOTTOM;
+			}
+			else {
+				_inning++;
+				_inning_half = INNING_TOP;
+			}
 		}
 	}
 
@@ -414,6 +438,12 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 		}
 	}
 
+	////DEBUG print movement
+	//printf("MOVEMENTS:\n");
+	//for (int i_m1 = 0; i_m1 < movements.size(); i_m1++) {
+	//	printf("  %d to %d\n", movements[i_m1].getStartingBase(), movements[i_m1].getEndingBase());
+	//}
+
 	//Loop over movements, make sure none of them have the same starting base
 	//unless it's the batter and there is an error
 	for (int i_m1 = 0; i_m1 < movements.size(); i_m1++) {
@@ -453,6 +483,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 					movements.erase(movements.begin() + i_m1);
 					//Decrease i_m1 so cell is not skipped
 					--i_m1;
+					break;
 				}
 				else if (movements[i_m1].getStartingBase() == 0 &&
 					movements[i_m1].getEndingBase() == 4) {
@@ -473,6 +504,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 					movements.erase(movements.begin() + i_m1);
 					//Decrease i_m1 so cell is not skipped
 					--i_m1;
+					break;
 				}
 				else {
 					//If it makes it here, it means two pieces of information in the play indicated
@@ -497,7 +529,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 
 	//Loop over movements, hopefully order of operations doesn't matter
 	for (auto&& m : movements) {
-
+		//printf("  APPLY %d to %d\n", m.getStartingBase(), m.getEndingBase());
 		//Determine starting player, and clear base of starting player
 		const ActivePlayer* p_start = NULL;
 		switch (m.getStartingBase()) {
@@ -575,6 +607,17 @@ const ActivePlayer* GameState::getBatter() const
 	//If it makes it here it's an error
 	throw std::exception("GameState::getBatter called for invalid _offensive_players vector");
 	return NULL;
+}
+
+TeamType GameState::getTeamBatting() const
+{
+	//Return team based on inning state
+	if (_inning_half == INNING_TOP) {
+		return TEAM_VISITOR;
+	}
+	else {
+		return TEAM_HOME;
+	}
 }
 
 void GameState::setBatter(const std::string player_id_)
