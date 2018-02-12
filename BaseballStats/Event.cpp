@@ -201,68 +201,71 @@ Event::Event(const Play* play_, const string* event_string_)
 		_baserunner_movements.push_back(BaserunnerMovement(0, 0, true));
 	}
 	break;
+	//Handle all of these outs on the bases together, this is required because 
+	//they may be mixed together in the same event
+	case PICKED_OFF:
+	case PICKED_OFF_CAUGHT_STEALING:
 	case CAUGHT_STEALING:
 	{
 		//There may be multiples, seperated by ;
+		//TODO: Need to handle CSH(13E2)(UR).3-H;, so clip before .?
 		vector<string> event_parsed;
 		boost::split(event_parsed, event_string, boost::is_any_of(";"));
+
+		//Loop over plays
 		for (auto&& event_string_single : event_parsed) {
-			//First decide if there was an error
-			const bool error_occured = doesErrorNegateOut(event_string_single);
-			//If there was an error, than this is not an out
-			const bool made_out = !error_occured;
-			//Determine which baserunner got out
-			if (event_string_single[2] == '2') {
-				//Out from 1 to 2
-				_baserunner_movements.push_back(BaserunnerMovement(1, 2, made_out, error_occured));
+			const EventResult result_current = parseBattingResult(event_string_single);
+			//Make sure event is valid
+			if (result_current != PICKED_OFF &&
+				result_current != PICKED_OFF_CAUGHT_STEALING &&
+				result_current != CAUGHT_STEALING) {
+				std::cout << "Event: current play " << event_string_single << std::endl;
+				throw std::exception("This is not a valid out on the bases");
 			}
-			else if (event_string_single[2] == '3') {
-				//Out from 2 to 3
-				_baserunner_movements.push_back(BaserunnerMovement(2, 3, made_out, error_occured));
+
+			//Handle each possible play seperately
+			if (result_current == PICKED_OFF) {
+				//Need to determine which runner was picked off
+				const int i_base_out = char2int(event_string_single[2]);
+				//Movement (with no movement) but with out
+				_baserunner_movements.push_back(BaserunnerMovement(i_base_out, i_base_out, true));
+
+				//Check for error
+				const bool is_error = doesErrorNegateOut(event_string_single);
+				if (is_error) {
+					//Found an error, get rid of BaserunnerMovement just added
+					_baserunner_movements.pop_back();
+					//Failed pickoff results in no baserunner movement
+				}
 			}
-			else if (event_string_single[2] == 'H') {
-				//Out from 3 to H
-				_baserunner_movements.push_back(BaserunnerMovement(3, 4, made_out, error_occured));
+			else if (result_current == PICKED_OFF_CAUGHT_STEALING) {
+				//Need to determine which runner was picked off
+				const int i_base_out = (event_string_single[4] == 'H') ? 4 : char2int(event_string_single[4]);
+				//It seems like the base given is where the out is made as he's stealing, so 
+				//he's coming from one before
+				_baserunner_movements.push_back(BaserunnerMovement(i_base_out - 1, i_base_out, true));
+
+				//Check for error
+				const bool is_error = doesErrorNegateOut(event_string_single);
+				if (is_error) {
+					//Found an error, get rid of BaserunnerMovement just added
+					_baserunner_movements.pop_back();
+					//Replace it with successful advance due to error
+					_baserunner_movements.push_back(BaserunnerMovement(i_base_out - 1, i_base_out, false, true));
+				}
+			}
+			else if (result_current == CAUGHT_STEALING) {
+				//First decide if there was an error
+				const bool error_occured = doesErrorNegateOut(event_string_single);
+				//If there was an error, than this is not an out
+				const bool made_out = !error_occured;
+				//Determine which baserunner got out
+				const int i_base_out = (event_string_single[2] == 'H') ? 4 : char2int(event_string_single[2]);
+				_baserunner_movements.push_back(BaserunnerMovement(i_base_out-1, i_base_out, made_out, error_occured));
 			}
 			else {
-				//Nothing else allowed
-				std::cout << event_string_single << std::endl;
-				throw std::exception("Event::Event: Invalid stolen base");
+				throw std::exception("Event: Invalid result_current set");
 			}
-		}
-	}
-		break;
-	case PICKED_OFF_CAUGHT_STEALING:
-	{
-		//Need to determine which runner was picked off
-		const int i_base_out = (event_string[4] == 'H' ) ? 4 : char2int(event_string[4]);
-		//It seems like the base given is where the out is made as he's stealing, so 
-		//he's coming from one before
-		_baserunner_movements.push_back(BaserunnerMovement(i_base_out-1, i_base_out, true));
-
-		//Check for error
-		const bool is_error = doesErrorNegateOut(event_string);
-		if (is_error) {
-			//Found an error, get rid of BaserunnerMovement just added
-			_baserunner_movements.pop_back();
-			//Replace it with successful advance due to error
-			_baserunner_movements.push_back(BaserunnerMovement(i_base_out - 1, i_base_out, false, true));
-		}
-	}
-	break;
-	case PICKED_OFF:
-	{
-		//Need to determine which runner was picked off
-		const int i_base_out = char2int(event_string[2]);
-		//Movement (with no movement) but with out
-		_baserunner_movements.push_back(BaserunnerMovement(i_base_out, i_base_out, true));
-
-		//Check for error
-		const bool is_error = doesErrorNegateOut(event_string);
-		if (is_error) {
-			//Found an error, get rid of BaserunnerMovement just added
-			_baserunner_movements.pop_back();
-			//Failed pickoff results in no baserunner movement
 		}
 	}
 	break;

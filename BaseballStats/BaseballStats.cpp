@@ -7,10 +7,16 @@
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
 
-//CURRENT STATUS: Need to handle this play from 1997FLO.EVN
+//Current Issue: File 948 1983SEA.EVA
+//Need to handle CSH(13E2)(UR).3-H;1-2 in the special caught stealing section.
+//I think it's including the ; in the play, but it should stop at the period I think
+//Line 201 of Event.cpp
+
+//Issue Fixed 2/11/18: Need to handle this play from 1997FLO.EVN
 //play, 1, 0, lockk001, 22, FCBB1, POCS2(134); CSH(42) / DP
 //Cannot handle picked off caught stealing and caught stealing in the same row.
-//Show probably combine handling of those two and PO
+//Combined handling of caught stealing, picked off, and picked off caught stealing
+//int he same section of Event()
 
 //Issue on 8/3/17, fixed in GameState::updateBaserunners by comparind the positions that
 //made the out to the positions that made the error
@@ -82,7 +88,8 @@
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1947NY1.EVN"
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2013MIL.EVN"
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2007SEA.EVA"
-#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1997FLO.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1997FLO.EVN"
+//#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1996HOU.EVN"
 
 //File which was missing a version line, updated code to not require it
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\1978CAL.EVA"
@@ -143,9 +150,15 @@ int main()
 			log_files.push_back(path_full);
 		}
 #endif
+		//Define which file to start with
+		//This will be the first file to actually process, zero processes all
+		const long i_file_start = 948;
+
 		//Parse files individually to find problems faster 
 		const long n_files = static_cast<long>( log_files.size() );
-		for (long ifile = 0; ifile < n_files; ifile++) {
+		for (long ifile = i_file_start; ifile < n_files; ifile++) {
+			//Check of this should be loaded
+			std::cout << "Reading File " << ifile << std::endl;
 			//Try last files first
 			const long i_array = n_files - ifile - 1;
 			const std::string filepath = log_files[i_array];
