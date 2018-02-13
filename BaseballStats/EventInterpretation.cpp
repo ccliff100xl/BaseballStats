@@ -67,6 +67,7 @@ const std::vector<EventInterpretation> EventInterpretation::InterpretationArray 
 	EventInterpretation("CSH", EventResult::CAUGHT_STEALING), //Caught stealing at home
 	EventInterpretation("DI", EventResult::DEFENSIVE_INDIFFERENCE), 
 	EventInterpretation("OA", EventResult::UNKNOWN_ADVANCE),
+	EventInterpretation("OBA", EventResult::UNKNOWN_ADVANCE),
 	EventInterpretation("PB", EventResult::PASSED_BALL),
 	EventInterpretation("WP", EventResult::WILD_PITCH),
 	EventInterpretation("PO", EventResult::PICKED_OFF),

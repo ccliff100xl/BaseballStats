@@ -394,7 +394,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 			//Find errors
 			std::vector<int> error_positions;
 			//Find position which made outs
-			std::vector<int> out_positions; //Store play, eg 92 (RF to Catcher) as single int
+			std::vector<long> out_positions; //Store play, eg 92 (RF to Catcher) as single long, rundowns are too long for string
 			for (auto&& details : line_parsed_details) {
 				//Check if any char is an error
 				bool found_error_local = false;
@@ -414,7 +414,7 @@ void GameState::updateBaserunners(const PlayRecord* play_)
 					//NOT error, add it if numeric
 					const int position_start = details[0] - '0';
 					if (position_start > 0 && position_start < 10) {
-						const int positions_out_local = string2int(details);
+						const long positions_out_local = string2longlong(details);
 						out_positions.push_back(positions_out_local);
 					}
 				}

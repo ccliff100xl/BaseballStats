@@ -26,38 +26,38 @@ Event::Event(const Play* play_, const string* event_string_)
 		if (play_->getEventRaw()[0] == '(') {
 			throw("Event::Event: invalid leading ( in event string");
 		}
-		const StringVector line_parsed_parantheses = SplitStringToVector(play_->getEventRaw(), "()");
+		//DEBUG
+		//if (play_->getEventRaw() == "CSH(13E2)(UR).3-H;1-2") {
+		//	std::cout << "FOUND: " << play_->getEventRaw() << std::endl;
+		//}
 		//Now, only search outside of (), index 0, 2, ...
 		//Find which comes first, / or ., create string of everything before (including ())
-		bool found_event_end = false;
-		for (int icell = 0; icell < line_parsed_parantheses.size(); icell++) {
-			//If icell is odd, add contents to string inside of parantheses
-			if (icell % 2 == 1) {
-				event_string.append("(");
-				event_string.append(line_parsed_parantheses[icell]);
-				event_string.append(")");
-				continue;
-			}
-			//This is even, so search for . or /
-			//If not found, add char to string
-			for (auto&& c : line_parsed_parantheses[icell]) {
-				if (c == '.' || c == '/') {
-					found_event_end = true;
-					break;
+		bool in_parentheses = false;
+		for (auto&& c : play_->getEventRaw()) {
+			//Check if beginning of parentheses
+			if (c == '(') {
+				if (in_parentheses) {
+					throw("Event::Event: Found ( inside ()");
 				}
-				else {
-					//If this is an FYI character, ignore it
-					if (c != '!' && c != '?' && c != '#') {
-						//No clean way to create string from char?
-						const char str[2] = { c, '\0' };
-						event_string.append(str);
-					}
-				}
+				in_parentheses = true;
 			}
-			if (found_event_end) {
-				//Done, break
+			else if ((c == '.' || c == '/') && !in_parentheses) {
+				//This is the end, if inside parentheses
 				break;
 			}
+			else if (c == ')') {
+				if (!in_parentheses) {
+					throw("Event::Event: Found ) not inside ()");
+				}
+				in_parentheses = false;
+			}
+			else if (c == '!' || c == '?' || c == '#') {
+				//Ignore these character
+				continue;
+			}
+			//Add this character
+			const char str[2] = { c, '\0' };
+			event_string.append(str);
 		}
 	}
 	const size_t n_chars_event = event_string.size();
@@ -208,7 +208,6 @@ Event::Event(const Play* play_, const string* event_string_)
 	case CAUGHT_STEALING:
 	{
 		//There may be multiples, seperated by ;
-		//TODO: Need to handle CSH(13E2)(UR).3-H;, so clip before .?
 		vector<string> event_parsed;
 		boost::split(event_parsed, event_string, boost::is_any_of(";"));
 

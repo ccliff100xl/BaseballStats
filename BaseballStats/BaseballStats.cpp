@@ -7,10 +7,14 @@
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
 
-//Current Issue: File 948 1983SEA.EVA
+//Current State: Able to process all regular season games. Now what?
+
+//I fixed a few files that had HR/#, by deleting the /#. But, that is actually valid.
+//It will print a warning as not recognized, but not cause an error
+
+//Fixed 2/12/18 File 948 1983SEA.EVA
 //Need to handle CSH(13E2)(UR).3-H;1-2 in the special caught stealing section.
-//I think it's including the ; in the play, but it should stop at the period I think
-//Line 201 of Event.cpp
+//Could not handle adjacent ()()
 
 //Issue Fixed 2/11/18: Need to handle this play from 1997FLO.EVN
 //play, 1, 0, lockk001, 22, FCBB1, POCS2(134); CSH(42) / DP
@@ -103,6 +107,9 @@
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015ANA.EVA"
 //#define GAME_LOG_FILE "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS\\2015ARI.EVN"
 
+//Define file index (0 processes all)
+#define FILE_INDEX_START 0
+
 //Path to files
 #define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
 //List of files in GAME_LOG_DIR
@@ -150,13 +157,9 @@ int main()
 			log_files.push_back(path_full);
 		}
 #endif
-		//Define which file to start with
-		//This will be the first file to actually process, zero processes all
-		const long i_file_start = 948;
-
 		//Parse files individually to find problems faster 
 		const long n_files = static_cast<long>( log_files.size() );
-		for (long ifile = i_file_start; ifile < n_files; ifile++) {
+		for (long ifile = FILE_INDEX_START; ifile < n_files; ifile++) {
 			//Check of this should be loaded
 			std::cout << "Reading File " << ifile << std::endl;
 			//Try last files first

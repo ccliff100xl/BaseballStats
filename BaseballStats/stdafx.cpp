@@ -66,3 +66,18 @@ int string2int(std::string s_)
 		throw(e);
 	}
 }
+
+long string2longlong(std::string s_)
+{
+	//Just try/catch around stol
+	try {
+		return stoll(s_);
+	}
+	catch (std::exception& e) {
+		//Print exception information
+		std::cout << "string2longlong ERROR: " << std::endl << e.what() << std::endl;
+		std::cout << "  Could not convert " << s_ << " to long long " << std::endl;
+		//Throw the exception
+		throw(e);
+	}
+}

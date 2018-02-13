@@ -14,6 +14,11 @@ bool operator==(const std::string log_pattern_, const ModifierInterpretation & m
 	boost::erase_all(log_pattern, "?");
 	boost::erase_all(log_pattern, "#");
 
+	//Check if the string is now empty
+	if (log_pattern.length() == 0) {
+		return false;
+	}
+
 	//If it makes it here, the modifier_string is char(s), get leading string from log_pattern
 	const size_t i_digit = log_pattern.find_first_of("0123456789");
 	//If i_digit is 0, it means the first char is a number, which means hit location
