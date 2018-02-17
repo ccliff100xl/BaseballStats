@@ -5,6 +5,7 @@
 #include "PlayRecord.h"
 
 class GameSet;
+class BaseballDatabaseSQL;
 
 class BaseballDatabase
 {
@@ -16,7 +17,7 @@ class BaseballDatabase
 	bool _players_locked = false; //If this is true, cannot call addPlayer
 	std::vector<PlayRecord> _plays;
 public:
-	BaseballDatabase(const TeamSet* ts_, const GameSet* gs_);
+	BaseballDatabase(const TeamSet* ts_, const GameSet* gs_, BaseballDatabaseSQL* dbsql_);
 
 	const std::vector<Player>& getPlayers() const { return _players; }
 	const Player getPlayer( const std::string player_id_ ) const;

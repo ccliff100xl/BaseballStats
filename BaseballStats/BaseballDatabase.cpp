@@ -1,4 +1,5 @@
 #include "BaseballDatabase.h"
+#include "BaseballDatabaseSQL.h"
 #include "GameSet.h"
 #include <algorithm>
 #include <iomanip>
@@ -6,7 +7,7 @@
 
 using namespace std;
 
-BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_) : _teams(*ts_)
+BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_, BaseballDatabaseSQL* dbsql_) : _teams(*ts_)
 {
 	//////////////////
 	/// Populate Players
@@ -53,9 +54,16 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_) : _te
 		GameState state(&game);
 		for (auto&& play : game.getPlays()) {
 			try {
+				//WARNING: For some reason, this fails if PlayRecord is created outside of
+				//_plays.push_back() and then added, which is scary
 				_plays.push_back(PlayRecord(&play, &state, &game, this));
+
+				//Add to SQL
+				dbsql_->addPlay(_plays.back());
 			}
 			catch (std::exception& e) {
+				//Print exception before anything, since following code can segfault
+				std::cout << "ERROR: " << std::endl << e.what() << std::endl;
 				//Print recent plays
 				printPlayList(10);
 				//Print some information, then throw the same exception

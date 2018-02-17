@@ -90,6 +90,9 @@
     <ClInclude Include="Pitch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BaseballDatabaseSQL.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -147,6 +150,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Pitch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BaseballDatabaseSQL.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -6,6 +6,7 @@
 #include "GameSet.h"
 #include "TeamSet.h"
 #include "BaseballDatabase.h"
+#include "BaseballDatabaseSQL.h"
 
 //Current State: Able to process all regular season games. Now what?
 
@@ -110,23 +111,30 @@
 //Define file index (0 processes all)
 #define FILE_INDEX_START 0
 
-//Path to files
-#define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
+//Path to files (for all regular seasons)
+//#define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
 //List of files in GAME_LOG_DIR
-#define LOG_FILE_LIST "event_log_file_list.txt"
+//#define LOG_FILE_LIST "event_log_file_list.txt"
 //#define LOG_FILE_LIST "event_log_file_list_2016.txt"
+
+//Path to files (for 2014 World Series)
+#define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS"
+#define LOG_FILE_LIST "world_series_log_file_list.txt"
 
 //Common to all 
 #define TEAM_LIST_FILE  "TeamList.txt"
 
 //Flag to control how much is printed (comment out to disable)
-#define BUILD_DB_ONLY =1
+#define BUILD_DB_ONLY 1
 
 using namespace std;
 
 int main()
 {
 	try {
+		//Create SQL database to hold everything loaded and processed
+		BaseballDatabaseSQL dbsql;
+
 		//Create TeamSet
 		TeamSet ts(TEAM_LIST_FILE);
 
@@ -173,7 +181,7 @@ int main()
 
 			//Create database
 			std::cout << "Creating BaseballDatabase from GameSet and TeamSet" << std::endl;
-			BaseballDatabase db(&ts, &gs);
+			BaseballDatabase db(&ts, &gs, &dbsql);
 
 #ifndef BUILD_DB_ONLY
 			//Run everyting (sort of a systest)
