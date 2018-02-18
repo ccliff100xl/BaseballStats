@@ -93,6 +93,9 @@
     <ClInclude Include="BaseballDatabaseSQL.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="sqlColumn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -153,6 +156,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BaseballDatabaseSQL.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sqlColumn.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

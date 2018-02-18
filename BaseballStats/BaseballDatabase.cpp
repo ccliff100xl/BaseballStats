@@ -28,8 +28,22 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_, Baseb
 			}
 		}
 	}
+
 	//Done populating players, sort the list
 	sort(_players.begin(), _players.end());
+
+	//Add all players to SQL
+	//static int n_char_max = 0;
+	for (auto&& p : _players) {
+		dbsql_->addPlayer(p);
+		//const int n_char_local = (int)p.getName().length();
+		//if (n_char_local > n_char_max) {
+		//	n_char_max = n_char_local;
+		//	//cout << p << std::endl;
+		//}
+	}
+	//std::cout << "Maximum Characters Player Name: " << n_char_max << std::endl;
+
 	//Lock vector
 	_players_locked = true;
 
@@ -59,7 +73,7 @@ BaseballDatabase::BaseballDatabase(const TeamSet* ts_, const GameSet* gs_, Baseb
 				_plays.push_back(PlayRecord(&play, &state, &game, this));
 
 				//Add to SQL
-				dbsql_->addPlay(_plays.back());
+				dbsql_->addEvent(_plays.back());
 			}
 			catch (std::exception& e) {
 				//Print exception before anything, since following code can segfault

@@ -16,5 +16,6 @@ public:
 
 	//Define accessors
 	std::string getID() const { return _id; }
+	std::string getName() const { return _name; }
 };
 
