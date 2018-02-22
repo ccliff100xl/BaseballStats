@@ -112,14 +112,14 @@
 #define FILE_INDEX_START 0
 
 //Path to files (for all regular seasons)
-//#define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
+#define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\ALL_REGULAR_SEASONS"
 //List of files in GAME_LOG_DIR
-//#define LOG_FILE_LIST "event_log_file_list.txt"
+#define LOG_FILE_LIST "event_log_file_list.txt"
 //#define LOG_FILE_LIST "event_log_file_list_2016.txt"
 
 //Path to files (for 2014 World Series)
-#define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS"
-#define LOG_FILE_LIST "world_series_log_file_list.txt"
+//#define GAME_LOG_DIR "C:\\Users\\micro\\OneDrive\\Documents\\BaseballStats\\2014PS"
+//#define LOG_FILE_LIST "world_series_log_file_list.txt"
 
 //Common to all 
 #define TEAM_LIST_FILE  "TeamList.txt"
@@ -131,6 +131,8 @@ using namespace std;
 
 int main()
 {
+	//Start overall timer
+	const std::clock_t start_time_main = std::clock();
 	try {
 		//Create SQL database to hold everything loaded and processed
 		BaseballDatabaseSQL dbsql;
@@ -207,17 +209,20 @@ int main()
 
 		//Print success to be clear
 		std::cout << "Exiting without error" << std::endl;
+		printRuntime(start_time_main);
 		return 0;
 
 	} catch (std::exception& e) {
 		//Print exception information
 		cout << "ERROR: " << endl << e.what() << endl;
 		//Return 1 for error
+		printRuntime(start_time_main);
 		return 1;
 	}
 	//Print success to be clear
 	std::cout << "Exiting without error" << std::endl;
 	//Return 0 for success
+	printRuntime(start_time_main);
     return 0;
 }
 

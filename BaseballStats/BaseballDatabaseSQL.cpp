@@ -96,11 +96,22 @@ BaseballDatabaseSQL::BaseballDatabaseSQL()
 	statement.append(")");
 	std::cout << statement << std::endl;
 	_stmt->execute(statement);
-}
 
+	//Use transactions to make things faster
+	_stmt->execute("START TRANSACTION");
+}
 
 BaseballDatabaseSQL::~BaseballDatabaseSQL()
 {
+	//Totally done, commit whatever may be needed
+	//Add this to time too
+	const std::clock_t start_time_add = std::clock();
+	commit();
+	_add_time_total += std::clock() - start_time_add;
+
+	//Done with object, print total time adding
+	std::cout << "Total BaseballDatabaseSQL ADDING Time " << clock2sec(_add_time_total) << " s" << std::endl;
+	
 	//Delete statement
 	delete _stmt; 
 	_stmt = NULL;
@@ -108,6 +119,58 @@ BaseballDatabaseSQL::~BaseballDatabaseSQL()
 	//Delete connection
 	delete _con;
 	_con = NULL;
+}
+
+//This should be called instead of _stmt->execute for adding 
+//to database. It will track how many adds have happened and
+//decide if they should be commited
+void BaseballDatabaseSQL::executeAdd(const std::string command_)
+{
+	//Start clock
+	const std::clock_t start_time_add = std::clock();
+
+	//Actually add to the database
+	try {
+		_stmt->execute(command_);
+	}
+	catch (std::exception& e)
+	{
+		//Print problems
+		std::cout << "ERROR adding to mySQL Datatbase: " << std::endl;
+		std::cout << "  Command: " << command_ << std::endl;
+		std::cout << "  " << e.what() << std::endl;
+	}
+	//Incremement counter
+	_count_adds++;
+	//Check counter
+	if (_count_adds > ADDS_PER_TRANSACTION) {
+		//Commit
+		commit();
+	}
+
+	//Add time to total
+	_add_time_total += std::clock() - start_time_add;
+}
+
+//This will send the commit command to mySQL and reset the counter
+void BaseballDatabaseSQL::commit()
+{
+	//Actually add to the database
+	try {
+		_stmt->execute("COMMIT");
+	}
+	catch (std::exception& e)
+	{
+		//Print problems
+		std::cout << "ERROR COMMITTING to mySQL Datatbase: " << std::endl;
+		std::cout << "  " << e.what() << std::endl;
+		throw e;
+	}
+	//Reset counter
+	_count_adds = 0;
+	
+	//Restart a transaction with mySQL
+	_stmt->execute("START TRANSACTION");
 }
 
 //This is the key function which converts whatever is in the PlayRecord
@@ -129,14 +192,7 @@ void BaseballDatabaseSQL::addEvent(const PlayRecord& pr_)
 	//std::cout << command << std::endl;
 
 	//Actually add to the database
-	try {
-		_stmt->execute(command);
-	}
-	catch (std::exception& e)
-	{
-		std::cout << "ERROR adding EVENT to mySQL Datatbase: ";
-		std::cout << e.what() << std::endl;
-	}
+	executeAdd(command);
 }
 
 //This adds only the player ID name, nothing else is known in Player
@@ -152,19 +208,11 @@ void BaseballDatabaseSQL::addPlayer(const Player& player_)
 	command.append(player_.getID());
 	command.append("\" , \"");
 	command.append(player_.getName());
-	//Do NOT add if already there TODO: add "WHERE..."
 	command.append("\")");
 
 	//Print command for reference
 	//std::cout << command << std::endl;
 
 	//Actually add to the database
-	try {
-		_stmt->execute(command);
-	}
-	catch (std::exception& e)
-	{
-		std::cout << "ERROR adding PLAYER to mySQL Datatbase: ";
-		std::cout << e.what() << std::endl;
-	}
+	executeAdd(command);
 }

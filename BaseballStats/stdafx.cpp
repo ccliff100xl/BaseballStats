@@ -81,3 +81,19 @@ long string2longlong(std::string s_)
 		throw(e);
 	}
 }
+
+//This will print the runtime from start_ to current
+void printRuntime(std::clock_t start_)
+{
+	//Calculate time in seconds
+	const double elapsed_s = clock2sec(std::clock() - start_);
+
+	//Print, could expand to adjust units based on magnitude
+	std::cout << "Total Time " << elapsed_s << " s" << std::endl;
+}
+
+//Convert output of std::clock (std::clock_t) to seconds
+double clock2sec(std::clock_t elapsed_)
+{
+	return elapsed_ / static_cast<double>(CLOCKS_PER_SEC);
+}
