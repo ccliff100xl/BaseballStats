@@ -67,7 +67,7 @@ int string2int(std::string s_)
 	}
 }
 
-long string2longlong(std::string s_)
+long long string2longlong(std::string s_)
 {
 	//Just try/catch around stol
 	try {
@@ -96,4 +96,22 @@ void printRuntime(std::clock_t start_)
 double clock2sec(std::clock_t elapsed_)
 {
 	return elapsed_ / static_cast<double>(CLOCKS_PER_SEC);
+}
+
+//Convert the string back to an enum
+EventResult string2enum(std::string str_, std::map< EventResult, const char * >& map_)
+{
+	//Loop over map and find match
+	for (auto&& item : map_){
+		if (strcmp(item.second, str_.c_str()) == 0) {
+			//Found
+			return item.first;
+		}
+	}
+
+	//If it makes it here, it did not find anything
+	throw std::exception("string2enum : Input string not found in map");
+
+	//This will never be reached
+	return NOT_RECOGNIZED;
 }

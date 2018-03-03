@@ -13,6 +13,9 @@
 //Includes for BaseballStats
 #include "PlayRecord.h"
 
+//IO includes
+#include <sstream>    
+
 //Define SQL server info (created db name etc. is hardcoded inline)
 #define SQL_HOST "localhost"
 #define SQL_USER "root"
@@ -76,7 +79,7 @@ BaseballDatabaseSQL::BaseballDatabaseSQL()
 		}
 	}
 	statement.append(")");
-	std::cout << statement << std::endl;
+	//std::cout << statement << std::endl;
 	_stmt->execute(statement);
 	 
 	//Add a table to hold all events
@@ -94,7 +97,7 @@ BaseballDatabaseSQL::BaseballDatabaseSQL()
 		}
 	}
 	statement.append(")");
-	std::cout << statement << std::endl;
+	//std::cout << statement << std::endl;
 	_stmt->execute(statement);
 
 	//Use transactions to make things faster
@@ -153,7 +156,7 @@ void BaseballDatabaseSQL::executeAdd(const std::string command_)
 }
 
 //This will send the commit command to mySQL and reset the counter
-void BaseballDatabaseSQL::commit()
+void BaseballDatabaseSQL::commit(bool start_new_transaction_)
 {
 	//Actually add to the database
 	try {
@@ -169,8 +172,10 @@ void BaseballDatabaseSQL::commit()
 	//Reset counter
 	_count_adds = 0;
 	
-	//Restart a transaction with mySQL
-	_stmt->execute("START TRANSACTION");
+	if (start_new_transaction_) {
+		//Restart a transaction with mySQL
+		_stmt->execute("START TRANSACTION");
+	}
 }
 
 //This is the key function which converts whatever is in the PlayRecord
@@ -215,4 +220,59 @@ void BaseballDatabaseSQL::addPlayer(const Player& player_)
 
 	//Actually add to the database
 	executeAdd(command);
+}
+
+//Get all the players where a specific player is the hitter
+std::vector<EventInfoSql> BaseballDatabaseSQL::getEventsForPlayer(const char* id_player_)
+{
+	//Create string to send to mySQL
+	std::stringstream command;
+	command << "SELECT * FROM EVENTS WHERE id_player = \"" << id_player_ << "\";";
+
+	//Get results from SQL
+	sql::ResultSet *res;
+	res = _stmt->executeQuery(command.str());
+
+	//Populate object to return
+	std::vector<EventInfoSql> events;
+
+	//Iterate over results
+	while (res->next()) {
+		////Print raw column values for debug
+		//for (auto&& c : EVENT_COLUMNS) {
+		//	//If this has the primary flag, skip
+		//	if (c.isPrimary()) continue;
+		//	std::cout << res->getString(c.getID()) << std::endl;
+		//}
+
+		//Add information, access via column index, assumes correct ordering
+		EventInfoSql e;
+		// Get event ID int directly
+		e._id_event = res->getInt(1);
+
+		// Get player ID string directly
+		e._id_player = res->getString(2);
+
+		// Need to convert SQL enum to string
+		std::string result_str = res->getString(3);
+		//Convert SQL string to enum
+		e._result = string2enum(result_str, BattingResultString);
+		//Convert parsed result and print for debug
+		//std::cout << BattingResultString[e._result] << std::endl << std::endl;
+
+		//Add event to output
+		events.push_back(e);
+	}
+	//Clear allocated
+	delete res; res = NULL;
+
+	//Return
+	return events;
+}
+
+//Create << for EventInfoSql
+std::ostream& operator<<(std::ostream & os, const EventInfoSql & e)
+{
+	os << e._id_event << " " << e._id_player << " " << BattingResultString[e._result];
+	return os;
 }
