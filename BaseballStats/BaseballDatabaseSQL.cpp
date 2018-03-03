@@ -27,10 +27,22 @@ const std::string BaseballDatabaseSQL::TABLE_EVENTS = "EVENTS";
 const std::string BaseballDatabaseSQL::TABLE_PLAYERS = "PLAYERS";
 
 //Define contents of tables
+
+//This is the main table format
+//To add a column, the following must be updated
+//    BaseballDatabaseSQL::EVENT_COLUMNS
+//    BaseballDatabaseSQL::addEvent
+//    EventInfoSql class members
+//    BaseballDatabaseSQL::getEventsForSQLCommand
 const std::vector<sqlColumn> BaseballDatabaseSQL::EVENT_COLUMNS = {
 	sqlColumn("id_event",  "INT NOT NULL AUTO_INCREMENT"),
 	sqlColumn("id_player",  "CHAR(8) NOT NULL"),
 	sqlColumn("result",  BattingResultString),
+	sqlColumn("sacrifice",  "BOOLEAN NOT NULL"),
+	sqlColumn("id_pitcher",  "CHAR(8) NOT NULL"),
+	sqlColumn("id_br_1",  "CHAR(8)"),
+	sqlColumn("id_br_2",  "CHAR(8)"),
+	sqlColumn("id_br_3",  "CHAR(8)"),
 	sqlColumn("PRIMARY KEY",  "(id_event)", true) //Add primary key like a column (must be last)
 };
 
@@ -187,10 +199,35 @@ void BaseballDatabaseSQL::addEvent(const PlayRecord& pr_)
 	//Need to keep column ids consistent with EVENT_COLUMNS
 	command.append("INSERT INTO ");
 	command.append(TABLE_EVENTS);
-	command.append(" ( id_player , result ) VALUES (\"");
+	command.append(" ( id_player , result , sacrifice, id_pitcher , id_br_1 , id_br_2 , id_br_3 ) VALUES (\"");
+	//Batter ID
 	command.append(pr_.getBatter()->getID());
 	command.append("\",\"");
+	//Event Result
 	command.append(BattingResultString[pr_.getEventResult()]);
+	command.append("\",\"");
+	//Sacrifice?
+	const char* sac_bool = (pr_._sacrifice) ? "1" : "0";
+	command.append(sac_bool);
+	command.append("\",\"");
+	//Pitcher ID
+	const GameState gs_start = pr_._state_start;
+	const ActivePlayer* pitcher = gs_start.getFielder(PITCHER);
+	command.append(pitcher->getID());
+	command.append("\",\"");
+	//Baserunner on first
+	const ActivePlayer* br1 = gs_start.getBaserunner(1);
+	if (br1 != NULL) command.append(br1->getID());
+	command.append("\",\"");
+	//Baserunner on second
+	const ActivePlayer* br2 = gs_start.getBaserunner(2);
+	if (br2 != NULL) command.append(br2->getID());
+	command.append("\",\"");
+	//Baserunner on third
+	const ActivePlayer* br3 = gs_start.getBaserunner(3);
+	if (br3 != NULL) command.append(br3->getID());
+
+	//Finish single " and )
 	command.append("\")");
 
 	//Print command for reference
@@ -229,12 +266,21 @@ std::vector<EventInfoSql> BaseballDatabaseSQL::getEventsForPlayer(const char* id
 	std::stringstream command;
 	command << "SELECT * FROM EVENTS WHERE id_player = \"" << id_player_ << "\";";
 
+	//Create object to return
+	std::vector<EventInfoSql> events;
+
+	//Call core function
+	getEventsForSQLCommand(command.str().c_str(), events);
+
+	//Return
+	return events;
+}
+
+void BaseballDatabaseSQL::getEventsForSQLCommand(const char* command_, std::vector<EventInfoSql>& events_)
+{
 	//Get results from SQL
 	sql::ResultSet *res;
-	res = _stmt->executeQuery(command.str());
-
-	//Populate object to return
-	std::vector<EventInfoSql> events;
+	res = _stmt->executeQuery(command_);
 
 	//Iterate over results
 	while (res->next()) {
@@ -250,29 +296,41 @@ std::vector<EventInfoSql> BaseballDatabaseSQL::getEventsForPlayer(const char* id
 		// Get event ID int directly
 		e._id_event = res->getInt(1);
 
-		// Get player ID string directly
+		// Get player Batter ID string directly
 		e._id_player = res->getString(2);
 
 		// Need to convert SQL enum to string
 		std::string result_str = res->getString(3);
 		//Convert SQL string to enum
 		e._result = string2enum(result_str, BattingResultString);
-		//Convert parsed result and print for debug
-		//std::cout << BattingResultString[e._result] << std::endl << std::endl;
+
+		//Get sacrific bool from int
+		e._sacrifice = res->getBoolean(4);
+
+		// Get player Pitcher ID string directly
+		e._id_pitcher = res->getString(5);
+
+		// Get player baserunner 1 ID string directly
+		e._id_br_1 = res->getString(6);
+
+		// Get player baserunner 2 ID string directly
+		e._id_br_2 = res->getString(7);
+
+		// Get player baserunner 3 ID string directly
+		e._id_br_3 = res->getString(8);
 
 		//Add event to output
-		events.push_back(e);
+		events_.push_back(e);
 	}
 	//Clear allocated
 	delete res; res = NULL;
-
-	//Return
-	return events;
 }
 
 //Create << for EventInfoSql
 std::ostream& operator<<(std::ostream & os, const EventInfoSql & e)
 {
 	os << e._id_event << " " << e._id_player << " " << BattingResultString[e._result];
+    os << " " << e._sacrifice << " " << e._id_pitcher;
+	os << " " << e._id_br_1 << " " << e._id_br_2 << " " << e._id_br_3;
 	return os;
 }

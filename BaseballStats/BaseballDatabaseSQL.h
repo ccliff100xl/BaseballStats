@@ -18,6 +18,13 @@ struct EventInfoSql
 	long _id_event;
 	std::string _id_player;
 	EventResult _result;
+	bool _sacrifice;
+
+	std::string _id_pitcher;
+
+	std::string _id_br_1;
+	std::string _id_br_2;
+	std::string _id_br_3;
 
 	//Doesn't need to be friend, but this counts as a declaration
 	friend std::ostream& operator<<(std::ostream & os, const EventInfoSql & e);
@@ -45,6 +52,9 @@ private:
 	//This should be called instead of _stmt->execute
 	void executeAdd(const std::string command_);
 	void commit( bool start_new_transaction_ = true);
+
+	//Core function to get events from database
+	void getEventsForSQLCommand(const char* command_, std::vector<EventInfoSql>& events_);
 
 	//Transactions are used to increase performance
 	//The "COMMIT" will happen occasionally, based on how many

@@ -4,6 +4,7 @@
 #include "GameState.h"
 #include "SportsStatsConstants.h"
 #include "BaserunnerMovement.h"
+#include "BaseballDatabaseSQL.h"
 
 class GameLog;
 class BaseballDatabase;
@@ -60,5 +61,9 @@ private:
 
 	//For printing
 	EventResult getBattingResult() const { return _event.getBattingResult(); }
+
+public:
+	//Make this a friend to simplify
+	friend void BaseballDatabaseSQL::addEvent(const PlayRecord& pr_);
 };
 

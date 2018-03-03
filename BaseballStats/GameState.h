@@ -61,6 +61,8 @@ public:
 
 	//Accessors
 	const ActivePlayer* getBatter() const;
+	const ActivePlayer* getBaserunner(int base_) const;
+	const ActivePlayer* getFielder(DefensivePosition pos_) const;
 	TeamType getTeamBatting() const;
 
 	//Setters

@@ -123,13 +123,12 @@ int main()
 			
 		}
 
-		//Database created, do operations
-		std::vector<EventInfoSql>& events = dbsql.getEventsForPlayer("poseb001");
+		//Database created, do operations "poseb001"
+		std::vector<EventInfoSql>& events = dbsql.getEventsForPlayer("perej002");
 		//Print as test
 		for (auto&& e : events) {
 			std::cout << e << std::endl;
 		}
-
 
 	} catch (std::exception& e) {
 		//Print exception information

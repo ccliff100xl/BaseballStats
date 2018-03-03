@@ -609,6 +609,27 @@ const ActivePlayer* GameState::getBatter() const
 	return NULL;
 }
 
+const ActivePlayer* GameState::getBaserunner(int base_) const
+{
+	if(base_ < 1) throw std::exception("GameState::getBaserunner called for invalid base_ (too low)");
+	if(base_ > 3) throw std::exception("GameState::getBaserunner called for invalid base_ (too high)");
+
+	return _offensive_players[base_];
+}
+
+const ActivePlayer* GameState::getFielder(DefensivePosition pos_) const
+{
+	//Get correct array of players
+	const std::vector<const ActivePlayer*>& players =
+		(_inning_half == INNING_TOP) ? _defensive_players_home : _defensive_players_away;
+
+	//Make sure this is valid
+	if(pos_ < PITCHER) throw std::exception("GameState::getFielder called for invalid pos_ (too low)");
+	if(pos_ > RIGHT_FIELD) throw std::exception("GameState::getFielder called for invalid pos_ (too high)");
+
+	return players[pos_];
+}
+
 TeamType GameState::getTeamBatting() const
 {
 	//Return team based on inning state
